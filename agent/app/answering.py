@@ -40,9 +40,12 @@ CONTINUATION = re.compile(
     r"^(and|or|also|but|then|what about|how about|what if|ok|okay)\b", re.IGNORECASE
 )
 
+# Guest-facing copy never mentions the document the answers are drawn from --
+# a guest is talking to a concierge, not querying a knowledge base. The
+# grounding is unchanged; only the wording is.
 REFUSAL = (
-    "I could not find that in the hotel document, so I would rather not guess. "
-    "Reception can help directly on +91 22 4567 8900 or "
+    "I could not find an answer to that one. Would you like to speak with our "
+    "reception? They are available 24 hours on +91 22 4567 8900, or at "
     "reservations@meridiangrand.example."
 )
 
@@ -265,12 +268,12 @@ class Answerer:
             # and be explicit that this is not a live check.
             options = [r for r in self.kb.rooms if r.capacity >= guests]
             listing = _room_lines(options, features=False) or (
-                "- No room category in the document seats that many guests."
+                "- None of our room categories seats that many guests."
             )
             return Answer(
                 text=(
-                    f"I could not reach live availability for {window} just now. "
-                    f"From the hotel document, these categories seat {guests} "
+                    f"I could not check live availability for {window} just now. "
+                    f"These room categories seat {guests} "
                     f"guest{'s' if guests != 1 else ''}:\n{listing}\n"
                     "Please confirm with reception on +91 22 4567 8900."
                 ),

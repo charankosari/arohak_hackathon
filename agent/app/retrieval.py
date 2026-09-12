@@ -50,7 +50,12 @@ ALIASES: dict[str, tuple[str, ...]] = {
     r"\bbreakfasts?\b|\bbuffets?\b": ("breakfast", "harbour", "table"),
     r"\bcheck ?-? ?in\b|\barriv\w+\b": ("check-in", "checkin", "check"),
     r"\bcheck ?-? ?out\b|\bdepart\w+\b|\bleav\w+\b": ("check-out", "checkout", "check"),
-    r"\bcancel\w*\b|\brefunds?\b": ("cancel", "cancellation", "booking"),
+    # "refund" is deliberately NOT aliased to cancellation. The document has a
+    # cancellation policy but says nothing about money being returned, and
+    # answering "will I get a refund" with the cancellation timings invites a
+    # guest to read refund terms into it. Left unmapped, refund questions fall
+    # through to the refusal, which hands them to reception.
+    r"\bcancel\w*\b": ("cancel", "cancellation", "booking"),
     r"\bairports?\b|\btransfers?\b|\bpick ?-? ?ups?\b|\btaxis?\b|\bcabs?\b|\bshuttles?\b": (
         "airport", "transfer", "concierge",
     ),

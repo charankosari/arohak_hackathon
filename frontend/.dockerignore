@@ -1,0 +1,18 @@
+node_modules
+.next
+out
+npm-debug.log*
+
+# NEXT_PUBLIC_* values come in as build args, never from a copied .env.
+.env
+.env.*
+!.env.example
+
+.git
+.gitignore
+Dockerfile
+.dockerignore
+docker-push.bat
+
+coverage
+*.log

@@ -1,0 +1,20 @@
+# core.autocrlf=true is set on this machine, which rewrites checked-out files
+# to CRLF. That is harmless for source, but fatal for anything Linux executes:
+# a shell script with CRLF endings makes the kernel read the shebang as
+# "/bin/sh\r", and the container dies with "no such file or directory".
+* text=auto
+
+*.sh text eol=lf
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+docker-entrypoint.sh text eol=lf
+
+# Batch files are the mirror image - cmd.exe wants CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+*.pdf binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary

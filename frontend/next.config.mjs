@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Emits .next/standalone with a self-contained server.js and only the
+  // node_modules actually reached at runtime - the Docker image is a fraction
+  // of the size of copying the whole dependency tree.
+  output: 'standalone',
+
   images: {
     remotePatterns: [
       // Admin-uploaded hotel and room photography.

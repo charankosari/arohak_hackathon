@@ -1,0 +1,19 @@
+node_modules
+npm-debug.log*
+
+# Secrets stay out of the image; they are supplied as runtime env vars.
+.env
+.env.*
+!.env.example
+
+.git
+.gitignore
+Dockerfile
+.dockerignore
+docker-push.bat
+
+# Local-only helpers.
+scripts/smoke-test.js
+scripts/clean-fixtures.js
+coverage
+*.log

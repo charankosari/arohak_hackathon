@@ -1,0 +1,23 @@
+# Context for the agent image is the repo root, so everything that is not the
+# agent or the source PDF is excluded - otherwise node_modules and .next would
+# be uploaded to the daemon on every build.
+.git
+.gitignore
+README.md
+docker-compose.yml
+
+frontend
+backend
+
+agent/.venv
+agent/venv
+agent/.env
+agent/.env.local
+agent/.pytest_cache
+agent/tests
+agent/README.md
+**/__pycache__
+**/*.py[cod]
+
+# Rebuilt during the image build.
+agent/data

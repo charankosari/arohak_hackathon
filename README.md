@@ -429,12 +429,25 @@ The backend does not require the agent: with `AGENT_URL` unset or the service do
 ### In the app
 
 A floating concierge — **Aarav** — sits bottom-right on every page except sign-in and
-registration. He is an inline SVG drawn in the brand palette and animated entirely in
-CSS: he breathes and blinks at rest, waves occasionally, glances up with three pulsing
-dots while the agent is working, and nods while an answer lands. No animation library,
-no timers, nothing re-renders to drive it, and the `prefers-reduced-motion` rule already
-in `globals.css` stops all of it — his resting pose is his correct static appearance, so
-freezing the animation leaves him composed rather than mid-blink.
+registration: an inline SVG bellhop in the brand palette, with a gold-frogged tailcoat,
+epaulettes, a tasselled pillbox cap, white gloves and a brass bell.
+
+He is animated almost entirely in CSS. At rest he breathes, blinks and sways, his tassel
+swings on its own slower rhythm, a highlight sweeps the brass cap band, and every so
+often he waves and rings the bell. While the agent works he glances up under lifted
+brows with three pulsing dots; while an answer lands he nods and talks. No animation
+library, no timers, and nothing re-renders to drive any of it.
+
+The one scripted touch is his eyes, which follow the pointer — written as two CSS custom
+properties from a rAF-throttled listener, so the pupils move without React re-rendering.
+That listener is never attached under `prefers-reduced-motion`, and the rule already in
+`globals.css` stops the rest. Each element's resting style is its correct static
+appearance, so freezing the animation leaves him composed rather than mid-blink.
+
+He is drawn once and framed twice by the viewBox: the full figure in the open panel,
+where there is room for the uniform and the bell, and a head-and-shoulders crop in the
+44px launcher and the panel header, because a whole bellhop shrunk to avatar size leaves
+a twelve-pixel face.
 
 Every answer shows its provenance: a green **Live availability** badge when the numbers
 came from the database, a **From the hotel document** badge when they came from the PDF,

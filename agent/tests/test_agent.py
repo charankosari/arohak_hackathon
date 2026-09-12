@@ -217,6 +217,46 @@ def test_refuses_undocumented_questions(bot, question):
     assert result.origin == "none"
 
 
+@pytest.mark.parametrize(
+    "question",
+    [
+        "if i cancel now can i get the money back",
+        "will i get a refund",
+        "is the deposit refundable",
+    ],
+)
+def test_refund_questions_go_to_reception(bot, question):
+    """The document has a cancellation policy but no refund terms.
+
+    Answering these with the cancellation timings would invite a guest to read
+    refund terms into them, and two phrasings of the same question would get
+    different answers.
+    """
+    assert ask(bot, question).text == REFUSAL
+
+
+def test_guest_copy_never_mentions_the_knowledge_base(bot):
+    """A guest is talking to a concierge, not watching a lookup fail.
+
+    The refusal offers reception instead of reporting a missing document, and
+    no answer the bot produces refers to the source it was grounded in.
+    """
+    assert "reception" in REFUSAL.lower()
+    assert "+91 22 4567 8900" in REFUSAL
+
+    leaks = ("document", "pdf", "knowledge base", "section ", "source")
+    questions = [q for q, _ in FACT_CASES] + OUT_OF_SCOPE + [
+        "hello",
+        "which room suits 4 guests?",
+        "can I cancel now and get my money back",
+        "any rooms available on 20 September for 4 guests?",
+    ]
+    for question in questions:
+        text = ask(bot, question).text.lower()
+        for leak in leaks:
+            assert leak not in text, f"{question!r} leaked {leak!r}: {text!r}"
+
+
 def test_answers_are_never_invented(bot):
     """Every documented answer must carry a citation back to the PDF."""
     for question, _ in FACT_CASES:

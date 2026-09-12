@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowUp, MessageCircleOff, Sparkles, X } from 'lucide-react';
+import { ArrowUp, MessageCircle, MessageCircleOff, X } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ConciergeCharacter } from '@/components/ConciergeCharacter';
@@ -11,11 +11,12 @@ import { api, ApiError } from '@/lib/api';
  *
  * Two things here are deliberate rather than decorative:
  *
- *  - Every answer shows where it came from. The agent returns `origin` and
- *    `sources`, so a policy quoted from the hotel document is badged
- *    differently from live availability read out of the database, and the PDF
- *    section behind any claim is one tap away. The agent is built never to
- *    invent an answer; showing its working is what makes that legible.
+ *  - It reads as a concierge, not as a search tool. The agent is grounded in
+ *    the hotel's own document and cannot invent a policy, price or timing, but
+ *    none of that machinery is narrated to the guest: no "from the document",
+ *    no section citations, and a miss offers reception rather than reporting a
+ *    failed lookup. The `origin` and `sources` fields still come back on every
+ *    reply, so the grounding stays auditable from the API itself.
  *  - Only the last few turns are sent back as history. The agent uses them
  *    solely to resolve a terse follow-up ("and the spa?"), so a longer tail
  *    would cost bandwidth and buy nothing.
@@ -36,14 +37,22 @@ const GREETING = {
   ],
 };
 
-/** Badge copy per `origin` value returned by the agent. */
+/**
+ * Badge copy per `origin` value returned by the agent.
+ *
+ * Only the live-data origins are surfaced, and only because "these are real
+ * rooms, checked just now" is reassuring to a guest. Nothing here tells them
+ * an answer was looked up in a document: a guest is talking to a concierge,
+ * not watching a search engine work. The agent still returns `origin` and
+ * `sources` on every reply, so the grounding stays auditable from the API and
+ * from the staff-only /api/chat/search endpoint.
+ */
 const ORIGIN_LABEL = {
-  live: { text: 'Live availability', tone: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
+  live: { text: 'Checked just now', tone: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
   'live+document': {
-    text: 'Live availability',
+    text: 'Checked just now',
     tone: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   },
-  document: { text: 'From the hotel document', tone: 'bg-sky-100 text-ink-700 border-sky-200' },
 };
 
 /**
@@ -82,36 +91,12 @@ function AnswerBody({ text }) {
   );
 }
 
-function Sources({ sources }) {
-  if (!sources?.length) return null;
-  return (
-    <details className="group mt-2.5">
-      <summary
-        className="inline-flex cursor-pointer list-none items-center gap-1 text-[0.7rem] font-medium
-                   text-ink-400 transition-colors hover:text-ink-600"
-      >
-        <Sparkles className="size-3" aria-hidden />
-        {sources.length === 1 ? '1 source' : `${sources.length} sources`}
-      </summary>
-      <ul className="mt-1.5 space-y-1.5 border-l-2 border-cream-300 pl-2.5">
-        {sources.map((source, i) => (
-          <li key={i} className="text-[0.7rem] leading-snug text-ink-400">
-            <span className="font-medium text-ink-600">{source.citation}</span>
-            {source.text && <span className="block italic">“{source.text}”</span>}
-          </li>
-        ))}
-      </ul>
-    </details>
-  );
-}
-
 /** Sign-in and registration are single-task screens; nothing floats over them. */
 const HIDDEN_ON = ['/login', '/register'];
 
 export function ChatWidget() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [everOpened, setEverOpened] = useState(false);
   const [messages, setMessages] = useState([GREETING]);
   const [input, setInput] = useState('');
   const [pending, setPending] = useState(false);
@@ -184,7 +169,6 @@ export function ChatWidget() {
             role: 'assistant',
             content: reply.answer,
             origin: reply.origin,
-            sources: reply.sources,
             suggestions: reply.suggestions,
           },
         ]);
@@ -233,52 +217,49 @@ export function ChatWidget() {
         type="button"
         onClick={() => {
           setOpen((v) => !v);
-          setEverOpened(true);
         }}
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label={open ? 'Close the concierge' : 'Ask the concierge'}
-        className="group fixed right-4 bottom-4 z-50 grid size-14 place-items-center rounded-full
-                   border-2 border-ink-900 bg-sky-300 shadow-lg transition-transform
-                   hover:scale-105 active:scale-95 sm:right-6 sm:bottom-6 sm:size-16"
+        aria-controls={open ? 'hotel-concierge-panel' : undefined}
+        className={'concierge-launcher fixed right-4 bottom-4 z-50 flex items-center gap-3 border border-cream-400 bg-cream-50 text-ink-900 sm:right-6 sm:bottom-6 ' + (open ? 'concierge-launcher--open' : '')}
       >
-        {/* Draws the eye once, then never again. */}
-        {!everOpened && (
-          <span
-            aria-hidden
-            className="chat-launcher__ping absolute inset-0 rounded-full bg-sky-400"
-          />
-        )}
-        {open ? (
-          <X className="relative size-6 text-ink-900" aria-hidden />
-        ) : (
-          <ConciergeCharacter
-            state={pending ? 'thinking' : mood}
-            frame="bust"
-            className="relative size-12 sm:size-14"
-            title=""
-          />
-        )}
+        {open ? <X className="size-5" aria-hidden /> : <>
+          <span className="concierge-portrait" aria-hidden="true">
+            <ConciergeCharacter state={pending ? 'thinking' : mood} frame="bust" className="h-full w-full" title="" />
+          </span>
+          <span className="hidden text-left sm:block">
+            <span className="block font-serif text-lg font-semibold leading-tight">Ask Aarav</span>
+            <span className="mt-1 block text-[11px] tracking-wide text-ink-500">Your hotel concierge</span>
+          </span>
+          <span className="hidden size-8 items-center justify-center rounded-full bg-cream-200 text-brass-800 sm:flex"><MessageCircle className="size-4" aria-hidden /></span>
+        </>}
       </button>
 
       {/* ---- Panel ---- */}
       {open && (
         <div
+          id="hotel-concierge-panel"
           role="dialog"
           aria-modal="false"
           aria-label="Concierge"
+          // The landing page runs Lenis with smoothWheel, which takes the wheel
+          // event for the whole document - so scrolling the conversation would
+          // scroll the page behind it instead. Lenis walks up from the event
+          // target looking for this attribute and leaves the subtree alone.
+          data-lenis-prevent
           className="chat-panel fixed right-4 bottom-22 z-50 flex w-[min(23.5rem,calc(100vw-2rem))]
                      flex-col overflow-hidden rounded-2xl border border-cream-400 bg-cream-50
                      sm:right-6 sm:bottom-26"
-          style={{ height: 'min(34rem, calc(100vh - 8rem))' }}
+          style={{ height: 'min(34rem, calc(100dvh - 8rem))' }}
         >
           {/* Header */}
           <header className="flex items-center gap-3 border-b border-cream-300 bg-cream-200 px-4 py-3">
-            <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-ink-900 bg-sky-300">
+            <span className="concierge-portrait concierge-portrait--header">
               <ConciergeCharacter
                 state={pending ? 'thinking' : mood}
                 frame="bust"
-                className="size-10"
+                className="h-full w-full"
                 title=""
               />
             </span>
@@ -352,7 +333,6 @@ export function ChatWidget() {
                       {ORIGIN_LABEL[message.origin].text}
                     </span>
                   )}
-                  <Sources sources={message.sources} />
                 </div>
               )
             )}
