@@ -21,6 +21,7 @@ from datetime import date
 
 from . import config
 from .dates import parse_guests, parse_stay
+from .conversation import normalize
 from .ingest import Facility, KnowledgeBase, Room
 from .live import LiveBackend
 from .retrieval import Retriever, tokenize
@@ -113,7 +114,7 @@ class Answerer:
     async def answer(
         self, question: str, today: date | None = None, context: str | None = None
     ) -> Answer:
-        question = (question or "").strip()
+        question = normalize(question or "")
         if not question:
             return Answer(
                 text="Ask me anything about The Meridian Grand Mumbai - policies, "
@@ -122,6 +123,7 @@ class Answerer:
                 suggestions=_DEFAULT_SUGGESTIONS,
             )
 
+        question = self._resolve_followup(question, normalize(context or ""), today)
         result = await self._respond(question, today)
 
         # Only if the message cannot stand on its own is the previous turn worth
@@ -134,6 +136,66 @@ class Answerer:
             text=REFUSAL, origin="none", confidence=0.0,
             suggestions=_DEFAULT_SUGGESTIONS,
         )
+
+    def _resolve_followup(self, question: str, context: str, today: date | None) -> str:
+        """Inherit only the missing fields of a clearly scoped follow-up."""
+        if not context:
+            return question
+        previous_stay = parse_stay(context, today)
+        previous_room = self._match_room(context)
+        # A standalone date or party-size answer continues a room search.
+        fragment = re.sub(r"^(?:and|what about|how about|for|okay|ok)\s+", "", question).strip(" ?.")
+        party_only = bool(re.fullmatch(r"(?:for )?(?:\d+|one|two|three|four|five|six) (?:guests?|people|adults?)", fragment))
+        date_words = set(re.findall(r"[a-z]+", question))
+        allowed_date_words = set("and what about how for from to until till through on in of the this next coming tomorrow today tonight weekend night nights guests people adults one two three four five six january february march april may june july august september october november december jan feb mar apr jun jul aug sep sept oct nov dec monday tuesday wednesday thursday friday saturday sunday st nd rd th".split())
+        dates_only = date_words <= allowed_date_words and bool(parse_stay(question, today)) and not re.search(
+            r"\b(?:cancel|refund|breakfast|spa|pool|parking|airport|check-in|check-out|pets|charge|price)\b", question
+        ) and len(question.split()) <= 10
+        search_context = bool(re.search(r"\b(?:rooms?|suites?|book|reserve|availability)\b", context))
+        if search_context and (dates_only or (party_only and previous_stay)):
+            parts = ["available rooms", question]
+            if not parse_stay(question, today) and previous_stay:
+                parts.append(f"from {previous_stay.check_in} to {previous_stay.check_out}")
+            if not parse_guests(question) and (guests := parse_guests(context)):
+                parts.append(f"for {guests} guests")
+            if previous_room and not self._match_room(question):
+                parts.append(previous_room.room_type)
+            return " ".join(parts)
+        if previous_room and re.fullmatch(r"(?:and |what about )?(?:how much(?: is it)?|(?:the )?(?:price|cost|rate)\??)", question.strip(" ?.")):
+            return f"price of {previous_room.room_type}"
+        return question
+
+    async def _live_prices(self, question: str, today: date | None) -> Answer | None:
+        if not re.search(r"\b(?:price|prices|cost|costs|rates?|cheapest|affordable|budget)\b|how much", question):
+            return None
+        if parse_stay(question, today) or re.search(r"\b(?:breakfast|bed|transfer|spa|cancel|refund|parking|charge)\b", question):
+            return None
+        matches = self._match_rooms(question)
+        if not matches and not re.search(r"\brooms?\b|\bsuites?\b", question):
+            return None
+        payload = await self.backend.room_types()
+        rows = payload.get("types", []) if isinstance(payload, dict) else []
+        if not rows:
+            fallback = self._room_facts(question)
+            if fallback:
+                fallback.text += " These are reference rates; confirm the current price when choosing your dates."
+            return fallback
+        if matches:
+            names = {r.room_type.lower() for r in matches}
+            rows = [r for r in rows if r.get("roomType", "").lower() in names]
+        if not rows:
+            return Answer(text="I could not find a current rate for that category. Please choose another room category or contact reception.", origin="live")
+        rows = sorted(rows, key=lambda r: float(r["minPrice"]))
+        if re.search(r"\bcheapest\b|\bmost affordable\b", question):
+            rows = [r for r in rows if float(r["minPrice"]) == float(rows[0]["minPrice"])]
+        lines = []
+        for row in rows:
+            low, high = float(row["minPrice"]), float(row["maxPrice"])
+            rate = _money(low) if low == high else f"{_money(low)}–{_money(high)}"
+            lines.append(f"- {row['roomType']}: {rate} per night, up to {row['maxGuests']} guests")
+        return Answer(text="Current room rates:\n" + "\n".join(lines) + "\nShare your check-in and check-out dates to check availability and your stay total.",
+                      sources=[Source("Live room rates", "Room category price ranges")], origin="live", confidence=0.95,
+                      suggestions=["Rooms tomorrow night", "What is included in every room?"])
 
     def _should_borrow(self, question: str) -> bool:
         """Whether an unanswerable message is a follow-up needing the prior turn.
@@ -155,9 +217,12 @@ class Answerer:
 
     async def _respond(self, question: str, today: date | None) -> Answer | None:
         """One pass down the composer ladder. None means nothing matched."""
+        if (result := await self._live_prices(question, today)) is not None:
+            return result
         for composer in (
             self._greeting,
             self._arrival_time,
+            self._basic_facts,
             self._room_facts,
             self._facility_facts,
         ):
@@ -330,6 +395,44 @@ class Answerer:
             confidence=0.95,
             suggestions=["What is the cancellation policy?", "Is breakfast included?"],
         )
+
+    def _basic_facts(self, question: str) -> Answer | None:
+        """Common short questions with unambiguous, structured hotel answers."""
+        clean = re.sub(r"^(?:hi[, ]+|please |can you tell me |tell me |what is |what's )", "", question).strip(" ?.")
+        overview_keys = {
+            "address": "Address", "hotel address": "Address", "location": "Address",
+            "phone number": "Contact Number", "contact number": "Contact Number",
+            "email": "Email", "email address": "Email", "contact email": "Email",
+            "reception hours": "Reception", "languages spoken": "Languages Supported at Reception",
+        }
+        key = overview_keys.get(clean)
+        if key and (value := self.kb.overview.get(key)):
+            return Answer(text=f"{key}: {value}", sources=[Source("Section 1 - Hotel Overview", f"{key}: {value}")], confidence=1.0)
+        aliases = {
+            "check-in time": "What time is check-in?",
+            "check-out time": "What time is check-out?",
+            "free wifi": "Is Wi-Fi free?",
+            "wifi included": "Is Wi-Fi free?",
+            "parking": "Does the hotel have parking?",
+            "free parking": "Does the hotel have parking?",
+            "breakfast included": "Is breakfast included?",
+            "early check-in": "Can I request early check-in?",
+            "extra bed": "Can I add an extra bed?",
+            "airport pickup": "Does the hotel provide airport transfers?",
+            "cancellation policy": "Can I cancel my booking?",
+        }
+        target = aliases.get(clean)
+        if target:
+            faq = next((f for f in self.kb.faqs if f.question == target), None)
+            if faq:
+                return Answer(text=faq.answer, sources=[Source("Section 11 - Frequently Asked Questions", faq.question)], confidence=1.0)
+        facilities = {"gym": "Fitness Centre", "pool": "Swimming Pool", "spa": "Spa", "restaurant": "Restaurant - Harbour Table", "rooftop lounge": "Rooftop Lounge - Skyline 18"}
+        facility_name = facilities.get(clean.removesuffix(" timings").removesuffix(" hours"))
+        if facility_name:
+            facility = next((f for f in self.kb.facilities if f.name == facility_name), None)
+            if facility:
+                return Answer(text=f"{facility.name}: {facility.detail}", sources=[Source("Section 6 - Hotel Facilities", facility.detail)], confidence=1.0)
+        return None
 
     def _arrival_time(self, question: str) -> Answer | None:
         """Compare an explicit arrival time with the documented check-in time."""

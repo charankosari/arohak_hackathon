@@ -494,3 +494,59 @@ def test_other_booking_intents_are_not_room_searches(kb, question):
     backend = StubBackend({'rooms': []})
     ask(Answerer(kb, backend), question)
     assert not backend.calls
+
+class RateBackend(StubBackend):
+    async def room_types(self):
+        return {'types': [
+            {'roomType': 'Deluxe Twin', 'minPrice': 9100, 'maxPrice': 9500, 'maxGuests': 2},
+            {'roomType': 'Family Suite', 'minPrice': 23000, 'maxPrice': 23000, 'maxGuests': 4},
+        ]}
+
+
+def test_current_api_prices_override_reference_rates(kb):
+    result = ask(Answerer(kb, RateBackend({'rooms': []})), 'pricing of deluxe twin')
+    assert '9,100' in result.text and '9,500' in result.text
+    assert '8,500' not in result.text
+    assert result.origin == 'live'
+
+
+def test_cheapest_live_category(kb):
+    result = ask(Answerer(kb, RateBackend({'rooms': []})), 'cheapest room')
+    assert 'Deluxe Twin' in result.text and 'Family Suite' not in result.text
+
+
+@pytest.mark.parametrize('question, expected', [
+    ('email address?', 'reservations@'), ('free wifi?', 'Complimentary'),
+    ('gym timings', '24 hours'), ('pool hours', '6:00 AM'),
+    ('breakfast included?', 'selected room packages'), ('airport pickup', 'additional charge'),
+    ('checkin time', '2:00 PM'), ('checkout time', '12:00 PM'),
+    ('contact number', '+91 22'), ('extra bed', 'selected room categories'),
+])
+def test_basic_short_questions(bot, question, expected):
+    result = ask(bot, question)
+    assert expected in result.text
+    assert result.sources
+
+
+@pytest.mark.parametrize('question, context, guests, start, end', [
+    ('for 4 guests', 'rooms from 13 september to 15 september for 2 guests', 4, 13, 15),
+    ('tomorrow', 'any rooms for 3 guests', 3, 13, 14),
+    ('14 to 16 september', 'rooms for 2 guests from 13 september to 15 september', 2, 14, 16),
+])
+def test_search_followups_replace_fields(kb, question, context, guests, start, end):
+    backend = StubBackend({'rooms': []})
+    result = asyncio.run(Answerer(kb, backend).answer(question, today=TODAY, context=context))
+    assert backend.calls == [(date(2026, 9, start), date(2026, 9, end), guests, None)]
+    assert result.origin == 'live'
+
+
+def test_price_followup_keeps_room(kb):
+    result = asyncio.run(Answerer(kb, RateBackend({})).answer('how much is it?', today=TODAY, context='tell me about deluxe twin'))
+    assert '9,100' in result.text
+
+
+def test_unrelated_dated_followup_does_not_search(kb):
+    backend = StubBackend({'rooms': []})
+    result = asyncio.run(Answerer(kb, backend).answer('weather tomorrow', today=TODAY, context='rooms for 2 guests tomorrow'))
+    assert backend.calls == []
+    assert result.origin == 'none'
