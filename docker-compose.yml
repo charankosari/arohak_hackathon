@@ -1,0 +1,49 @@
+# Infrastructure for the Meridian Grand hotel management system.
+#
+#   docker compose up -d       start
+#   docker compose down        stop (data survives)
+#   docker compose down -v     stop and wipe all data
+#
+# Non-default host ports are used deliberately so these never collide with a
+# PostgreSQL or Redis already running on the machine.
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: meridian-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: meridian
+      POSTGRES_PASSWORD: meridian_dev_pw
+      POSTGRES_DB: meridian
+    ports:
+      - "5433:5432"
+    volumes:
+      - meridian_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meridian -d meridian"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:8-alpine
+    container_name: meridian-redis
+    restart: unless-stopped
+    # Cache-shaped eviction: drop the least-recently-used key when full rather
+    # than refusing writes. Nothing here is a source of truth.
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  meridian_pgdata:

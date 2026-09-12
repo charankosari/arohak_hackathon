@@ -1,0 +1,206 @@
+// Meridian Grand - hotel booking & management data model.
+// Business rules mirror AROHAK_Hotel_Information_For_RAG.pdf (sections 2-4).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  ADMIN
+  RECEPTIONIST
+  CUSTOMER
+}
+
+enum HotelStatus {
+  ACTIVE
+  INACTIVE
+}
+
+/// Operational state of a physical room, independent of any booking.
+/// Only AVAILABLE rooms can be booked; the rest are blocked by housekeeping,
+/// maintenance, or a current in-house guest.
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+  OUT_OF_SERVICE
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+  NO_SHOW
+}
+
+/// Raised when a guest asks to cancel after the 24-hour direct-cancellation
+/// window has closed. PDF section 3: such requests need staff review.
+enum CancellationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ---------------------------------------------------------------------------
+// Identity
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(CUSTOMER)
+  phone        String?
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  bookings             Booking[]             @relation("GuestBookings")
+  bookingsCreated      Booking[]             @relation("BookingCreatedBy")
+  bookingsCancelled    Booking[]             @relation("BookingCancelledBy")
+  cancellationsRaised  CancellationRequest[] @relation("CancellationRequestedBy")
+  cancellationsHandled CancellationRequest[] @relation("CancellationReviewedBy")
+
+  @@index([role])
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// Property
+// ---------------------------------------------------------------------------
+
+model Hotel {
+  id            String      @id @default(uuid())
+  /// Human-readable hotel ID shown to staff and guests, e.g. "HGMUM001".
+  code          String      @unique
+  name          String
+  address       String
+  city          String
+  description   String?
+  contactNumber String      @map("contact_number")
+  email         String
+  status        HotelStatus @default(ACTIVE)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  rooms    Room[]
+  bookings Booking[]
+
+  @@index([city])
+  @@index([status])
+  @@map("hotels")
+}
+
+model Room {
+  id            String     @id @default(uuid())
+  hotelId       String     @map("hotel_id")
+  /// Door number, unique within its hotel, e.g. "1204".
+  roomNumber    String     @map("room_number")
+  roomType      String     @map("room_type")
+  /// Maximum number of guests permitted (PDF section 4 capacity).
+  maxGuests     Int        @map("max_guests")
+  pricePerNight Decimal    @map("price_per_night") @db.Decimal(10, 2)
+  status        RoomStatus @default(AVAILABLE)
+  description   String?
+  amenities     String[]   @default([])
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  hotel    Hotel     @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@unique([hotelId, roomNumber])
+  @@index([hotelId])
+  @@index([roomType])
+  @@index([status])
+  @@map("rooms")
+}
+
+// ---------------------------------------------------------------------------
+// Reservations
+// ---------------------------------------------------------------------------
+
+model Booking {
+  id        String @id @default(uuid())
+  /// Guest-facing confirmation code, e.g. "MG-7QK4ZB".
+  reference String @unique
+
+  hotelId String @map("hotel_id")
+  roomId  String @map("room_id")
+  /// Account the booking belongs to. A receptionist booking a walk-in still
+  /// attaches it to the guest's customer account.
+  guestId String @map("guest_id")
+  /// Who actually keyed the booking in (guest themselves, or staff).
+  createdById String @map("created_by_id")
+
+  // Snapshot of guest contact details at time of booking.
+  guestName  String @map("guest_name")
+  guestEmail String @map("guest_email")
+  guestPhone String? @map("guest_phone")
+
+  checkIn  DateTime @map("check_in") @db.Date
+  checkOut DateTime @map("check_out") @db.Date
+  guests   Int
+  nights   Int
+
+  /// Rate snapshot - a later price change on the room must not rewrite history.
+  nightlyRate Decimal @map("nightly_rate") @db.Decimal(10, 2)
+  totalAmount Decimal @map("total_amount") @db.Decimal(10, 2)
+
+  status          BookingStatus @default(CONFIRMED)
+  specialRequests String?       @map("special_requests")
+
+  cancelledAt        DateTime? @map("cancelled_at")
+  cancelledById      String?   @map("cancelled_by_id")
+  cancellationReason String?   @map("cancellation_reason")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  hotel                Hotel                 @relation(fields: [hotelId], references: [id], onDelete: Restrict)
+  room                 Room                  @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  guest                User                  @relation("GuestBookings", fields: [guestId], references: [id], onDelete: Restrict)
+  createdBy            User                  @relation("BookingCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  cancelledBy          User?                 @relation("BookingCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
+  cancellationRequests CancellationRequest[]
+
+  @@index([guestId])
+  @@index([roomId, checkIn, checkOut])
+  @@index([status])
+  @@index([checkIn])
+  @@map("bookings")
+}
+
+model CancellationRequest {
+  id        String             @id @default(uuid())
+  bookingId String             @map("booking_id")
+  requestedById String         @map("requested_by_id")
+  reason    String
+  status    CancellationStatus @default(PENDING)
+
+  reviewedById String?   @map("reviewed_by_id")
+  reviewNote   String?   @map("review_note")
+  reviewedAt   DateTime? @map("reviewed_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  booking     Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  requestedBy User    @relation("CancellationRequestedBy", fields: [requestedById], references: [id], onDelete: Restrict)
+  reviewedBy  User?   @relation("CancellationReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([bookingId])
+  @@index([status])
+  @@map("cancellation_requests")
+}

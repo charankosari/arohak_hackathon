@@ -1,0 +1,91 @@
+@import 'tailwindcss';
+
+/*
+ * The Meridian Grand - design tokens.
+ * Deep navy and brass, the palette of a seafront luxury hotel.
+ */
+@theme {
+  --color-ink-50: #f5f7fa;
+  --color-ink-100: #e9eef5;
+  --color-ink-200: #cfdae8;
+  --color-ink-300: #a6bad2;
+  --color-ink-400: #6f8bab;
+  --color-ink-500: #4a6685;
+  --color-ink-600: #354d68;
+  --color-ink-700: #253a52;
+  --color-ink-800: #18293d;
+  --color-ink-900: #0f1c2d;
+  --color-ink-950: #08121e;
+
+  --color-brass-50: #fdf9ef;
+  --color-brass-100: #faf0d7;
+  --color-brass-200: #f3dea8;
+  --color-brass-300: #eac673;
+  --color-brass-400: #e0ab47;
+  --color-brass-500: #c8902c;
+  --color-brass-600: #a67122;
+  --color-brass-700: #82551f;
+  --color-brass-800: #5e3e1d;
+  --color-brass-900: #3d2a16;
+
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif), ui-serif, Georgia, serif;
+}
+
+:root {
+  --surface: var(--color-ink-50);
+  --surface-raised: #ffffff;
+  --border-subtle: var(--color-ink-200);
+  --text-strong: var(--color-ink-900);
+  --text-muted: var(--color-ink-500);
+}
+
+body {
+  background: var(--surface);
+  color: var(--text-strong);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Keyboard focus is always visible, and always in the brand colour. */
+*:focus-visible {
+  outline: 2px solid var(--color-brass-500);
+  outline-offset: 2px;
+}
+
+/* Hide the spinner on number inputs - guest counts use explicit controls. */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+@utility card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-fade-up {
+  animation: fade-up 0.25s ease-out both;
+}
+
+/* Respect a reduced-motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

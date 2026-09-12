@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Environment
+.env
+.env.local
+
+# RAG index artifacts (regenerate with `python -m scripts.ingest`)
+backend/data/*.pkl
+backend/data/*.json
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
