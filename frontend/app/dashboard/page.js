@@ -12,6 +12,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { Alert, Badge, Button, Card, CardHeader, EmptyState, LoadingBlock, StatTile } from '@/components/ui';
@@ -21,11 +22,17 @@ import { formatDate, money } from '@/lib/format';
 
 export default function DashboardPage() {
   const { user, isAdmin, isStaff, isCustomer } = useAuth();
+  const router = useRouter();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
+  // Guests have no overview - their bookings are the landing page.
   useEffect(() => {
-    if (!user) return;
+    if (isCustomer) router.replace('/dashboard/my-bookings');
+  }, [isCustomer, router]);
+
+  useEffect(() => {
+    if (!user || isCustomer) return;
 
     async function load() {
       try {
@@ -35,24 +42,19 @@ export default function DashboardPage() {
             api.bookings.frontDesk(),
           ]);
           setData({ dashboard, frontDesk });
-        } else if (isStaff) {
+        } else {
           const frontDesk = await api.bookings.frontDesk();
           setData({ frontDesk });
-        } else {
-          const [bookings, requests] = await Promise.all([
-            api.bookings.list({ take: 5 }),
-            api.cancellations.list({ take: 5 }),
-          ]);
-          setData({ bookings, requests });
         }
       } catch (err) {
         setError(err.message);
       }
     }
     load();
-  }, [user, isAdmin, isStaff]);
+  }, [user, isAdmin, isStaff, isCustomer]);
 
-  if (!user) return null;
+  // Redirecting; render nothing rather than flashing an empty overview.
+  if (!user || isCustomer) return null;
 
   return (
     <div className="space-y-6">
@@ -83,114 +85,10 @@ export default function DashboardPage() {
         <Card>
           <LoadingBlock rows={4} />
         </Card>
-      ) : isCustomer ? (
-        <CustomerOverview {...data} />
       ) : (
         <StaffOverview isAdmin={isAdmin} {...data} />
       )}
     </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Guest
-// ---------------------------------------------------------------------------
-
-function CustomerOverview({ bookings, requests }) {
-  const upcoming = bookings.bookings.filter((b) =>
-    ['CONFIRMED', 'CHECKED_IN'].includes(b.status)
-  );
-  const pending = requests.requests.filter((r) => r.status === 'PENDING');
-  const nextStay = upcoming[upcoming.length - 1];
-
-  return (
-    <>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatTile
-          label="Upcoming stays"
-          value={upcoming.length}
-          icon={CalendarCheck}
-          tone="brass"
-        />
-        <StatTile label="Total bookings" value={bookings.total} icon={BedDouble} />
-        <StatTile
-          label="Pending requests"
-          value={pending.length}
-          hint={pending.length ? 'Awaiting staff review' : 'Nothing pending'}
-          icon={XCircle}
-          tone="light"
-        />
-      </div>
-
-      {nextStay && (
-        <Card className="overflow-hidden">
-          <CardHeader
-            title="Your next stay"
-            subtitle={`Confirmation ${nextStay.reference}`}
-            action={
-              <Link href="/dashboard/my-bookings">
-                <Button variant="outline" size="sm">
-                  All bookings
-                </Button>
-              </Link>
-            }
-          />
-          <div className="grid gap-4 p-5 sm:grid-cols-4">
-            {[
-              ['Room', `${nextStay.room.roomType} - ${nextStay.room.roomNumber}`],
-              ['Check-in', `${formatDate(nextStay.checkIn)}, 2:00 PM`],
-              ['Check-out', `${formatDate(nextStay.checkOut)}, 12:00 PM`],
-              ['Total', money(nextStay.totalAmount)],
-            ].map(([label, value]) => (
-              <div key={label}>
-                <p className="text-xs tracking-wide text-ink-400 uppercase">{label}</p>
-                <p className="mt-1 text-sm font-medium text-ink-900">{value}</p>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      <Card>
-        <CardHeader title="Recent bookings" />
-        {bookings.bookings.length === 0 ? (
-          <EmptyState
-            icon={CalendarPlus}
-            title="You have no bookings yet"
-            action={
-              <Link href="/rooms">
-                <Button variant="brass">Browse rooms</Button>
-              </Link>
-            }
-          >
-            Find a room and your reservation will appear here.
-          </EmptyState>
-        ) : (
-          <ul className="divide-y divide-ink-100">
-            {bookings.bookings.map((booking) => (
-              <li key={booking.id} className="flex flex-wrap items-center gap-3 px-5 py-3.5">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-ink-900">
-                    {booking.room.roomType}
-                    <span className="ml-2 font-mono text-xs text-ink-400">
-                      {booking.reference}
-                    </span>
-                  </p>
-                  <p className="mt-0.5 text-xs text-ink-500">
-                    {formatDate(booking.checkIn)} &rarr; {formatDate(booking.checkOut)} &middot;{' '}
-                    {booking.nights} {booking.nights === 1 ? 'night' : 'nights'}
-                  </p>
-                </div>
-                <Badge status={booking.status} />
-                <span className="text-sm font-medium text-ink-900">
-                  {money(booking.totalAmount)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
-    </>
   );
 }
 

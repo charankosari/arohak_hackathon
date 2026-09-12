@@ -1,0 +1,14 @@
+# RAG chatbot service for The Meridian Grand Mumbai.
+#
+# Deliberately small. Retrieval and answer composition are implemented in pure
+# Python (see app/retrieval.py), so there is no model download, no vector
+# database and no external AI API in the request path.
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pypdf==5.1.0
+httpx==0.28.1
+python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
+
+# Tests only.
+pytest==8.3.4

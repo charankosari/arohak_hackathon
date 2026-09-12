@@ -1,6 +1,6 @@
 'use client';
 
-import { CalendarPlus, CalendarRange, Clock } from 'lucide-react';
+import { BedDouble, CalendarCheck, CalendarPlus, CalendarRange, Clock, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { CancelDialog } from '@/components/CancelDialog';
@@ -15,6 +15,7 @@ import {
   Input,
   LoadingBlock,
   Modal,
+  StatTile,
 } from '@/components/ui';
 import { api } from '@/lib/api';
 import {
@@ -34,6 +35,7 @@ const FILTERS = [
 
 export default function MyBookingsPage() {
   const [bookings, setBookings] = useState(null);
+  const [pendingRequests, setPendingRequests] = useState(0);
   const [filter, setFilter] = useState('upcoming');
   const [error, setError] = useState(null);
   const [notice, setNotice] = useState(null);
@@ -54,6 +56,18 @@ export default function MyBookingsPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Guests have no overview page, so the headline numbers live here.
+  useEffect(() => {
+    api.cancellations
+      .list({ status: 'PENDING', take: 50 })
+      .then(({ total }) => setPendingRequests(total))
+      .catch(() => setPendingRequests(0));
+  }, []);
+
+  const upcoming = (bookings ?? []).filter((b) =>
+    ['CONFIRMED', 'CHECKED_IN'].includes(b.status)
+  );
 
   const visible = (bookings ?? []).filter((booking) => {
     if (filter === 'all') return true;
@@ -101,6 +115,27 @@ export default function MyBookingsPage() {
         </Alert>
       )}
       {error && <Alert tone="error">{error}</Alert>}
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatTile
+          label="Upcoming stays"
+          value={upcoming.length}
+          icon={CalendarCheck}
+          tone="brass"
+        />
+        <StatTile
+          label="Total bookings"
+          value={bookings?.length ?? 0}
+          icon={BedDouble}
+        />
+        <StatTile
+          label="Pending requests"
+          value={pendingRequests}
+          hint={pendingRequests ? 'Awaiting staff review' : 'Nothing pending'}
+          icon={XCircle}
+          tone="light"
+        />
+      </div>
 
       <div className="flex flex-wrap gap-2">
         {FILTERS.map((option) => (

@@ -22,10 +22,11 @@ import { ROLES } from '@/lib/constants';
  */
 const NAV = [
   {
+    // Guests have no overview page - they go straight to their bookings.
     href: '/dashboard',
     label: 'Overview',
     icon: LayoutDashboard,
-    roles: [ROLES.ADMIN, ROLES.RECEPTIONIST, ROLES.CUSTOMER],
+    roles: [ROLES.ADMIN, ROLES.RECEPTIONIST],
   },
   {
     href: '/dashboard/front-desk',

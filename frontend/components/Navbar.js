@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
+import { CalendarCheck, LayoutDashboard, LogOut, Menu, X, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -15,10 +15,23 @@ const PUBLIC_LINKS = [
   { href: '/rooms', label: 'Rooms & Suites' },
 ];
 
+/**
+ * Guests have no "dashboard" to speak of - just their own reservations - so
+ * they get those two links directly. Staff keep the single dashboard entry.
+ */
+const GUEST_LINKS = [
+  { href: '/dashboard/my-bookings', label: 'My bookings', icon: CalendarCheck },
+  { href: '/dashboard/cancellations', label: 'Cancellations', icon: XCircle },
+];
+
 export function Navbar() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, isCustomer } = useAuth();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const accountLinks = isCustomer
+    ? GUEST_LINKS
+    : [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }];
 
   return (
     <header className="sticky top-0 z-40 border-b border-cream-300/70 bg-cream-100/85 backdrop-blur-md">
@@ -30,7 +43,7 @@ export function Navbar() {
             width={40}
             height={40}
             priority
-            className="size-10 rounded-full object-cover"
+            className="h-10 w-auto object-contain"
           />
           <span className="hidden leading-tight sm:block">
             <span className="block font-serif text-base font-semibold text-ink-900">
@@ -63,13 +76,22 @@ export function Navbar() {
             <div className="h-10 w-24 animate-pulse rounded-full bg-cream-200" />
           ) : user ? (
             <>
-              <Link
-                href="/dashboard"
-                className="hidden items-center gap-2 rounded-full px-4 py-2 text-sm text-ink-600 hover:bg-sky-100 hover:text-ink-900 sm:flex"
-              >
-                <LayoutDashboard className="size-4" />
-                Dashboard
-              </Link>
+              <span className="hidden items-center gap-1 sm:flex">
+                {accountLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm transition-colors ${
+                      pathname.startsWith(link.href)
+                        ? 'bg-sky-200 font-medium text-ink-900'
+                        : 'text-ink-600 hover:bg-sky-100 hover:text-ink-900'
+                    }`}
+                  >
+                    <link.icon className="size-4" />
+                    {link.label}
+                  </Link>
+                ))}
+              </span>
               <div className="hidden items-center gap-2.5 border-l border-cream-300 pl-3 sm:flex">
                 <span
                   className="grid size-9 place-items-center rounded-full bg-sky-300 text-xs font-semibold text-ink-900"
@@ -140,13 +162,16 @@ export function Navbar() {
             ))}
             {user ? (
               <>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setMenuOpen(false)}
-                  className="rounded-lg px-3 py-2 text-sm text-ink-700 hover:bg-sky-100"
-                >
-                  Dashboard
-                </Link>
+                {accountLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="rounded-lg px-3 py-2 text-sm text-ink-700 hover:bg-sky-100"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
                 <div className="mt-2 flex items-center justify-between border-t border-cream-300 pt-3">
                   <span className="text-sm text-ink-900">
                     {user.name}

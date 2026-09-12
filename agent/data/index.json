@@ -1,0 +1,957 @@
+{
+  "source": "AROHAK_Hotel_Information_For_RAG.pdf",
+  "overview": {
+    "Hotel Name": "The Meridian Grand Mumbai",
+    "Hotel ID": "HGMUM001",
+    "Address": "18 Marine View Road, Nariman Point, Mumbai, Maharashtra 400021",
+    "Contact Number": "+91 22 4567 8900",
+    "Email": "reservations@meridiangrand.example",
+    "Website": "www.meridiangrand.example",
+    "Check-in": "2:00 PM",
+    "Check-out": "12:00 PM",
+    "Reception": "Open 24 hours",
+    "Languages Supported at Reception": "English, Hindi, Marathi"
+  },
+  "rooms": [
+    {
+      "room_type": "Deluxe King",
+      "capacity": 2,
+      "price_per_night": 8500,
+      "currency": "INR",
+      "features": "King bed, city view, work desk"
+    },
+    {
+      "room_type": "Deluxe Twin",
+      "capacity": 2,
+      "price_per_night": 8500,
+      "currency": "INR",
+      "features": "Two twin beds, city view, work desk"
+    },
+    {
+      "room_type": "Premier Sea View",
+      "capacity": 3,
+      "price_per_night": 12500,
+      "currency": "INR",
+      "features": "King bed, sea view, sofa chair"
+    },
+    {
+      "room_type": "Executive Suite",
+      "capacity": 3,
+      "price_per_night": 18000,
+      "currency": "INR",
+      "features": "Bedroom, living area, sea view"
+    },
+    {
+      "room_type": "Family Suite",
+      "capacity": 4,
+      "price_per_night": 22000,
+      "currency": "INR",
+      "features": "Two bedrooms, living area, dining table"
+    }
+  ],
+  "facilities": [
+    {
+      "name": "Restaurant - Harbour Table",
+      "detail": "Ground floor, open 6:30 AM-11:00 PM. Breakfast is served 6:30 AM-10:30 AM."
+    },
+    {
+      "name": "Rooftop Lounge - Skyline 18",
+      "detail": "18th floor, open 5:00 PM-12:00 AM. Entry is restricted to guests aged 21 and above after 8:00 PM."
+    },
+    {
+      "name": "Fitness Centre",
+      "detail": "3rd floor, open 24 hours for hotel guests."
+    },
+    {
+      "name": "Swimming Pool",
+      "detail": "4th floor, open 6:00 AM-9:00 PM. Children below 12 must be accompanied by an adult."
+    },
+    {
+      "name": "Business Centre",
+      "detail": "2nd floor, open 7:00 AM-10:00 PM."
+    },
+    {
+      "name": "Spa",
+      "detail": "4th floor, open 10:00 AM-9:00 PM. Advance appointments are recommended."
+    }
+  ],
+  "faqs": [
+    {
+      "question": "What time is check-in?",
+      "answer": "Standard check-in is at 2:00 PM."
+    },
+    {
+      "question": "What time is check-out?",
+      "answer": "Standard check-out is at 12:00 PM."
+    },
+    {
+      "question": "Is Wi-Fi free?",
+      "answer": "Yes. Complimentary Wi-Fi is available throughout the hotel."
+    },
+    {
+      "question": "Does the hotel have parking?",
+      "answer": "Yes. Basement parking is available and complimentary for registered hotel guests, subject to availability."
+    },
+    {
+      "question": "Can I cancel my booking?",
+      "answer": "Direct cancellation is available until 24 hours before check-in. Later cancellation requests require staff review."
+    },
+    {
+      "question": "Is breakfast included?",
+      "answer": "Breakfast is included only in selected room packages. Guests should check their booking details."
+    },
+    {
+      "question": "Does the hotel have a swimming pool?",
+      "answer": "Yes. The pool is on the 4th floor and operates from 6:00 AM to 9:00 PM."
+    },
+    {
+      "question": "Is the gym open 24 hours?",
+      "answer": "Yes. The fitness centre on the 3rd floor is open 24 hours for hotel guests."
+    },
+    {
+      "question": "Can I request early check-in?",
+      "answer": "Yes, but it is subject to availability. Early check-in before 10:00 AM may incur a charge of INR 1,500."
+    },
+    {
+      "question": "Can I add an extra bed?",
+      "answer": "Extra beds are available only for selected room categories and must be requested in advance."
+    },
+    {
+      "question": "Does the hotel provide airport transfers?",
+      "answer": "Yes. Airport transfers can be arranged through the concierge for an additional charge."
+    },
+    {
+      "question": "Can four guests stay in a Deluxe King room?",
+      "answer": "No. The Deluxe King room has a maximum capacity of 2 guests."
+    },
+    {
+      "question": "Which room is suitable for four guests?",
+      "answer": "The Family Suite has a maximum capacity of 4 guests."
+    },
+    {
+      "question": "What should the chatbot do if information is not in this document?",
+      "answer": "It should state that the information is not available in the provided hotel document rather than inventing an answer."
+    }
+  ],
+  "chunks": [
+    {
+      "id": "s1-c0",
+      "text": "Hotel Name: The Meridian Grand Mumbai",
+      "section": 1,
+      "section_title": "Hotel Overview",
+      "subsection": null,
+      "kind": "overview",
+      "citation": "Section 1 - Hotel Overview"
+    },
+    {
+      "id": "s1-c1",
+      "text": "Hotel ID: HGMUM001",
+      "section": 1,
+      "section_title": "Hotel Overview",
+      "subsection": null,
+      "kind": "overview",
+      "citation": "Section 1 - Hotel Overview"
+    },
+    {
+      "id": "s1-c2",
+      "text": "Address: 18 Marine View Road, Nariman Point, Mumbai, Maharashtra 400021",
+      "section": 1,
+      "section_title": "Hotel Overview",
+      "subsection": null,
+      "kind": "overview",
+      "citation": "Section 1 - Hotel Overview"
+    },
+    {
+      "id": "s1-c3",
+      "text": "Contact Number: +91 22 4567 8900",
+      "section": 1,
+      "section_title": "Hotel Overview",
+      "subsection": null,
+      "kind": "overview",
+      "citation": "Section 1 - Hotel Overview"
+    },
+    {
+      "id": "s1-c4",
+      "text": "Email: reservations@meridiangrand.example",
+      "section": 1,
+      "section_title": "Hotel Overview",
+      "subsection": null,
+      "kind": "overview",
+      "citation": "Section 1 - Hotel Overview"
+    },
+    {
+      "id": "s1-c5",
+      "text": "Website: www.meridiangrand.example",
+      "section": 1,
+      "section_title": "Hotel Overview",
+      "subsection": null,
+      "kind": "overview",
+      "citation": "Section 1 - Hotel Overview"
+    },
+    {
+      "id": "s1-c6",
+      "text": "Check-in: 2:00 PM",
+      "section": 1,
+      "section_title": "Hotel Overview",
+      "subsection": null,
+      "kind": "overview",
+      "citation": "Section 1 - Hotel Overview"
+    },
+    {
+      "id": "s1-c7",
+      "text": "Check-out: 12:00 PM",
+      "section": 1,
+      "section_title": "Hotel Overview",
+      "subsection": null,
+      "kind": "overview",
+      "citation": "Section 1 - Hotel Overview"
+    },
+    {
+      "id": "s1-c8",
+      "text": "Reception: Open 24 hours",
+      "section": 1,
+      "section_title": "Hotel Overview",
+      "subsection": null,
+      "kind": "overview",
+      "citation": "Section 1 - Hotel Overview"
+    },
+    {
+      "id": "s1-c9",
+      "text": "Languages Supported at Reception: English, Hindi, Marathi",
+      "section": 1,
+      "section_title": "Hotel Overview",
+      "subsection": null,
+      "kind": "overview",
+      "citation": "Section 1 - Hotel Overview"
+    },
+    {
+      "id": "s2-c10",
+      "text": "Standard check-in time is 2:00 PM.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Check-in Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Check-in Policy"
+    },
+    {
+      "id": "s2-c11",
+      "text": "Guests must provide a valid government-issued photo ID at check-in.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Check-in Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Check-in Policy"
+    },
+    {
+      "id": "s2-c12",
+      "text": "The name on the booking should match the guest's identification document.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Check-in Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Check-in Policy"
+    },
+    {
+      "id": "s2-c13",
+      "text": "Early check-in is subject to room availability and is not guaranteed.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Check-in Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Check-in Policy"
+    },
+    {
+      "id": "s2-c14",
+      "text": "Early check-in before 10:00 AM may incur a charge of INR 1,500, subject to availability.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Check-in Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Check-in Policy"
+    },
+    {
+      "id": "s2-c15",
+      "text": "Standard check-out time is 12:00 PM.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Check-out Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Check-out Policy"
+    },
+    {
+      "id": "s2-c16",
+      "text": "Late check-out until 2:00 PM is subject to availability and may be complimentary for selected room categories.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Check-out Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Check-out Policy"
+    },
+    {
+      "id": "s2-c17",
+      "text": "Late check-out after 2:00 PM and before 6:00 PM is charged at 50% of the applicable nightly room rate.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Check-out Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Check-out Policy"
+    },
+    {
+      "id": "s2-c18",
+      "text": "Check-out after 6:00 PM is charged at the full applicable nightly room rate.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Check-out Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Check-out Policy"
+    },
+    {
+      "id": "s2-c19",
+      "text": "Maximum occupancy depends on the room category.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Guest and Occupancy Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Guest and Occupancy Policy"
+    },
+    {
+      "id": "s2-c20",
+      "text": "Children below 6 years can stay in an existing bed at no additional room charge.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Guest and Occupancy Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Guest and Occupancy Policy"
+    },
+    {
+      "id": "s2-c21",
+      "text": "An extra bed is available only for selected room categories and must be requested in advance.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Guest and Occupancy Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Guest and Occupancy Policy"
+    },
+    {
+      "id": "s2-c22",
+      "text": "The maximum number of occupants must not exceed the room's stated capacity.",
+      "section": 2,
+      "section_title": "Hotel Policies",
+      "subsection": "Guest and Occupancy Policy",
+      "kind": "fact",
+      "citation": "Section 2 - Hotel Policies > Guest and Occupancy Policy"
+    },
+    {
+      "id": "s3-c23",
+      "text": "A customer can directly cancel a booking until 24 hours before the scheduled check-in date.",
+      "section": 3,
+      "section_title": "Cancellation and Modification Policy",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 3 - Cancellation and Modification Policy"
+    },
+    {
+      "id": "s3-c24",
+      "text": "For a booking with check-in on 20 September, direct cancellation is available until 19 September.",
+      "section": 3,
+      "section_title": "Cancellation and Modification Policy",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 3 - Cancellation and Modification Policy"
+    },
+    {
+      "id": "s3-c25",
+      "text": "Cancellation requests submitted after the direct-cancellation deadline require staff review.",
+      "section": 3,
+      "section_title": "Cancellation and Modification Policy",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 3 - Cancellation and Modification Policy"
+    },
+    {
+      "id": "s3-c26",
+      "text": "Approved cancellation requests change the booking status to CANCELLED.",
+      "section": 3,
+      "section_title": "Cancellation and Modification Policy",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 3 - Cancellation and Modification Policy"
+    },
+    {
+      "id": "s3-c27",
+      "text": "Rejected cancellation requests leave the booking active/confirmed.",
+      "section": 3,
+      "section_title": "Cancellation and Modification Policy",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 3 - Cancellation and Modification Policy"
+    },
+    {
+      "id": "s3-c28",
+      "text": "A cancelled booking cannot be cancelled again.",
+      "section": 3,
+      "section_title": "Cancellation and Modification Policy",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 3 - Cancellation and Modification Policy"
+    },
+    {
+      "id": "s3-c29",
+      "text": "Date modifications are subject to room availability and may require staff approval.",
+      "section": 3,
+      "section_title": "Cancellation and Modification Policy",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 3 - Cancellation and Modification Policy"
+    },
+    {
+      "id": "s3-c30",
+      "text": "The hotel does not guarantee availability after a modification request until the change is confirmed.",
+      "section": 3,
+      "section_title": "Cancellation and Modification Policy",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 3 - Cancellation and Modification Policy"
+    },
+    {
+      "id": "s4-c31",
+      "text": "2 guests",
+      "section": 4,
+      "section_title": "Room Categories",
+      "subsection": "Deluxe King",
+      "kind": "fact",
+      "citation": "Section 4 - Room Categories > Deluxe King"
+    },
+    {
+      "id": "s4-c32",
+      "text": "2 guests",
+      "section": 4,
+      "section_title": "Room Categories",
+      "subsection": "Deluxe Twin",
+      "kind": "fact",
+      "citation": "Section 4 - Room Categories > Deluxe Twin"
+    },
+    {
+      "id": "s4-c33",
+      "text": "Two twin beds, city view, work desk",
+      "section": 4,
+      "section_title": "Room Categories",
+      "subsection": "INR 8,500",
+      "kind": "fact",
+      "citation": "Section 4 - Room Categories > INR 8,500"
+    },
+    {
+      "id": "s4-c34",
+      "text": "3 guests",
+      "section": 4,
+      "section_title": "Room Categories",
+      "subsection": "Premier Sea View",
+      "kind": "fact",
+      "citation": "Section 4 - Room Categories > Premier Sea View"
+    },
+    {
+      "id": "s4-c35",
+      "text": "3 guests",
+      "section": 4,
+      "section_title": "Room Categories",
+      "subsection": "Executive Suite",
+      "kind": "fact",
+      "citation": "Section 4 - Room Categories > Executive Suite"
+    },
+    {
+      "id": "s4-c36",
+      "text": "4 guests",
+      "section": 4,
+      "section_title": "Room Categories",
+      "subsection": "Family Suite",
+      "kind": "fact",
+      "citation": "Section 4 - Room Categories > Family Suite"
+    },
+    {
+      "id": "s5-c37",
+      "text": "All room categories include:",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities"
+    },
+    {
+      "id": "s5-c38",
+      "text": "Smart television with local and international channels",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": "Air conditioning",
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities > Air conditioning"
+    },
+    {
+      "id": "s5-c39",
+      "text": "Complimentary bottled water (2 bottles per night)",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": "Mini refrigerator",
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities > Mini refrigerator"
+    },
+    {
+      "id": "s5-c40",
+      "text": "Executive Suite and Family Suite additionally include:",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": "Daily housekeeping",
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities > Daily housekeeping"
+    },
+    {
+      "id": "s6-c41",
+      "text": "Restaurant - Harbour Table: Ground floor, open 6:30 AM-11:00 PM. Breakfast is served 6:30 AM-10:30 AM.",
+      "section": 6,
+      "section_title": "Hotel Facilities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 6 - Hotel Facilities"
+    },
+    {
+      "id": "s6-c42",
+      "text": "Rooftop Lounge - Skyline 18: 18th floor, open 5:00 PM-12:00 AM. Entry is restricted to guests aged 21 and above after 8:00 PM.",
+      "section": 6,
+      "section_title": "Hotel Facilities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 6 - Hotel Facilities"
+    },
+    {
+      "id": "s6-c43",
+      "text": "Fitness Centre: 3rd floor, open 24 hours for hotel guests.",
+      "section": 6,
+      "section_title": "Hotel Facilities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 6 - Hotel Facilities"
+    },
+    {
+      "id": "s6-c44",
+      "text": "Swimming Pool: 4th floor, open 6:00 AM-9:00 PM. Children below 12 must be accompanied by an adult.",
+      "section": 6,
+      "section_title": "Hotel Facilities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 6 - Hotel Facilities"
+    },
+    {
+      "id": "s6-c45",
+      "text": "Business Centre: 2nd floor, open 7:00 AM-10:00 PM.",
+      "section": 6,
+      "section_title": "Hotel Facilities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 6 - Hotel Facilities"
+    },
+    {
+      "id": "s6-c46",
+      "text": "Spa: 4th floor, open 10:00 AM-9:00 PM. Advance appointments are recommended.",
+      "section": 6,
+      "section_title": "Hotel Facilities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 6 - Hotel Facilities"
+    },
+    {
+      "id": "s7-c47",
+      "text": "Basement parking is available for hotel guests.",
+      "section": 7,
+      "section_title": "Parking and Transportation",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 7 - Parking and Transportation"
+    },
+    {
+      "id": "s7-c48",
+      "text": "Parking is complimentary for registered hotel guests.",
+      "section": 7,
+      "section_title": "Parking and Transportation",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 7 - Parking and Transportation"
+    },
+    {
+      "id": "s7-c49",
+      "text": "Parking spaces are subject to availability and cannot be reserved in advance.",
+      "section": 7,
+      "section_title": "Parking and Transportation",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 7 - Parking and Transportation"
+    },
+    {
+      "id": "s7-c50",
+      "text": "The hotel is approximately 25 km from Chhatrapati Shivaji Maharaj International Airport, depending on traffic.",
+      "section": 7,
+      "section_title": "Parking and Transportation",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 7 - Parking and Transportation"
+    },
+    {
+      "id": "s7-c51",
+      "text": "Airport transfers can be arranged through the concierge at an additional charge.",
+      "section": 7,
+      "section_title": "Parking and Transportation",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 7 - Parking and Transportation"
+    },
+    {
+      "id": "s7-c52",
+      "text": "Airport transfer requests should ideally be submitted at least 6 hours before pickup.",
+      "section": 7,
+      "section_title": "Parking and Transportation",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 7 - Parking and Transportation"
+    },
+    {
+      "id": "s8-c53",
+      "text": "Breakfast buffet is available at Harbour Table from 6:30 AM to 10:30 AM.",
+      "section": 8,
+      "section_title": "Food and Beverage",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 8 - Food and Beverage"
+    },
+    {
+      "id": "s8-c54",
+      "text": "Breakfast is included in selected room packages only; guests should check their booking details.",
+      "section": 8,
+      "section_title": "Food and Beverage",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 8 - Food and Beverage"
+    },
+    {
+      "id": "s8-c55",
+      "text": "24-hour in-room dining is available.",
+      "section": 8,
+      "section_title": "Food and Beverage",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 8 - Food and Beverage"
+    },
+    {
+      "id": "s8-c56",
+      "text": "Vegetarian, vegan, Jain, and selected allergy-sensitive meal options are available on request.",
+      "section": 8,
+      "section_title": "Food and Beverage",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 8 - Food and Beverage"
+    },
+    {
+      "id": "s8-c57",
+      "text": "Guests should inform the restaurant about serious food allergies before ordering.",
+      "section": 8,
+      "section_title": "Food and Beverage",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 8 - Food and Beverage"
+    },
+    {
+      "id": "s9-c58",
+      "text": "Complimentary Wi-Fi is available throughout guest rooms and common areas.",
+      "section": 9,
+      "section_title": "Wi-Fi and Connectivity",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 9 - Wi-Fi and Connectivity"
+    },
+    {
+      "id": "s9-c59",
+      "text": "The guest Wi-Fi network is named MeridianGuest.",
+      "section": 9,
+      "section_title": "Wi-Fi and Connectivity",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 9 - Wi-Fi and Connectivity"
+    },
+    {
+      "id": "s9-c60",
+      "text": "Guests receive the Wi-Fi access details at check-in.",
+      "section": 9,
+      "section_title": "Wi-Fi and Connectivity",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 9 - Wi-Fi and Connectivity"
+    },
+    {
+      "id": "s9-c61",
+      "text": "For connectivity problems, guests can contact reception or the IT support desk.",
+      "section": 9,
+      "section_title": "Wi-Fi and Connectivity",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 9 - Wi-Fi and Connectivity"
+    },
+    {
+      "id": "s10-c62",
+      "text": "Accessible rooms are available in selected room categories.",
+      "section": 10,
+      "section_title": "Accessibility",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 10 - Accessibility"
+    },
+    {
+      "id": "s10-c63",
+      "text": "The hotel has wheelchair-accessible public areas and elevators.",
+      "section": 10,
+      "section_title": "Accessibility",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 10 - Accessibility"
+    },
+    {
+      "id": "s10-c64",
+      "text": "Guests requiring an accessible room should mention the requirement while booking.",
+      "section": 10,
+      "section_title": "Accessibility",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 10 - Accessibility"
+    },
+    {
+      "id": "s10-c65",
+      "text": "Accessibility requests are subject to room availability and should be confirmed with the hotel.",
+      "section": 10,
+      "section_title": "Accessibility",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 10 - Accessibility"
+    },
+    {
+      "id": "s12-c66",
+      "text": "The chatbot should retrieve relevant passages from this PDF before answering policy, facility, room, or FAQ questions.",
+      "section": 12,
+      "section_title": "RAG Grounding Rules for Candidates",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 12 - RAG Grounding Rules for Candidates"
+    },
+    {
+      "id": "s12-c67",
+      "text": "Answers should be grounded in the retrieved content.",
+      "section": 12,
+      "section_title": "RAG Grounding Rules for Candidates",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 12 - RAG Grounding Rules for Candidates"
+    },
+    {
+      "id": "s12-c68",
+      "text": "The chatbot should not invent hotel policies, amenities, prices, timings, or facilities that are not present in the PDF.",
+      "section": 12,
+      "section_title": "RAG Grounding Rules for Candidates",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 12 - RAG Grounding Rules for Candidates"
+    },
+    {
+      "id": "s12-c69",
+      "text": "When the PDF does not contain an answer, the chatbot should clearly state that the information is unavailable in the provided document.",
+      "section": 12,
+      "section_title": "RAG Grounding Rules for Candidates",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 12 - RAG Grounding Rules for Candidates"
+    },
+    {
+      "id": "s12-c70",
+      "text": "Candidates should make the source of the answer traceable where practical, for example by showing the relevant document section or citation.",
+      "section": 12,
+      "section_title": "RAG Grounding Rules for Candidates",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 12 - RAG Grounding Rules for Candidates"
+    },
+    {
+      "id": "s12-c71",
+      "text": "The PDF is intended as a knowledge source only. Booking availability and actual booking actions should come from the application's live backend data, not from this PDF.",
+      "section": 12,
+      "section_title": "RAG Grounding Rules for Candidates",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 12 - RAG Grounding Rules for Candidates"
+    },
+    {
+      "id": "faq-0",
+      "text": "What time is check-in? Standard check-in is at 2:00 PM.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-1",
+      "text": "What time is check-out? Standard check-out is at 12:00 PM.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-2",
+      "text": "Is Wi-Fi free? Yes. Complimentary Wi-Fi is available throughout the hotel.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-3",
+      "text": "Does the hotel have parking? Yes. Basement parking is available and complimentary for registered hotel guests, subject to availability.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-4",
+      "text": "Can I cancel my booking? Direct cancellation is available until 24 hours before check-in. Later cancellation requests require staff review.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-5",
+      "text": "Is breakfast included? Breakfast is included only in selected room packages. Guests should check their booking details.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-6",
+      "text": "Does the hotel have a swimming pool? Yes. The pool is on the 4th floor and operates from 6:00 AM to 9:00 PM.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-7",
+      "text": "Is the gym open 24 hours? Yes. The fitness centre on the 3rd floor is open 24 hours for hotel guests.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-8",
+      "text": "Can I request early check-in? Yes, but it is subject to availability. Early check-in before 10:00 AM may incur a charge of INR 1,500.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-9",
+      "text": "Can I add an extra bed? Extra beds are available only for selected room categories and must be requested in advance.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-10",
+      "text": "Does the hotel provide airport transfers? Yes. Airport transfers can be arranged through the concierge for an additional charge.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-11",
+      "text": "Can four guests stay in a Deluxe King room? No. The Deluxe King room has a maximum capacity of 2 guests.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-12",
+      "text": "Which room is suitable for four guests? The Family Suite has a maximum capacity of 4 guests.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "faq-13",
+      "text": "What should the chatbot do if information is not in this document? It should state that the information is not available in the provided hotel document rather than inventing an answer.",
+      "section": 11,
+      "section_title": "Frequently Asked Questions",
+      "subsection": null,
+      "kind": "faq",
+      "citation": "Section 11 - Frequently Asked Questions"
+    },
+    {
+      "id": "room-0",
+      "text": "Deluxe King room: sleeps 2 guests, INR 8,500 per night. King bed, city view, work desk.",
+      "section": 4,
+      "section_title": "Room Categories",
+      "subsection": "Deluxe King",
+      "kind": "room",
+      "citation": "Section 4 - Room Categories > Deluxe King"
+    },
+    {
+      "id": "room-1",
+      "text": "Deluxe Twin room: sleeps 2 guests, INR 8,500 per night. Two twin beds, city view, work desk.",
+      "section": 4,
+      "section_title": "Room Categories",
+      "subsection": "Deluxe Twin",
+      "kind": "room",
+      "citation": "Section 4 - Room Categories > Deluxe Twin"
+    },
+    {
+      "id": "room-2",
+      "text": "Premier Sea View room: sleeps 3 guests, INR 12,500 per night. King bed, sea view, sofa chair.",
+      "section": 4,
+      "section_title": "Room Categories",
+      "subsection": "Premier Sea View",
+      "kind": "room",
+      "citation": "Section 4 - Room Categories > Premier Sea View"
+    },
+    {
+      "id": "room-3",
+      "text": "Executive Suite room: sleeps 3 guests, INR 18,000 per night. Bedroom, living area, sea view.",
+      "section": 4,
+      "section_title": "Room Categories",
+      "subsection": "Executive Suite",
+      "kind": "room",
+      "citation": "Section 4 - Room Categories > Executive Suite"
+    },
+    {
+      "id": "room-4",
+      "text": "Family Suite room: sleeps 4 guests, INR 22,000 per night. Two bedrooms, living area, dining table.",
+      "section": 4,
+      "section_title": "Room Categories",
+      "subsection": "Family Suite",
+      "kind": "room",
+      "citation": "Section 4 - Room Categories > Family Suite"
+    }
+  ]
+}
