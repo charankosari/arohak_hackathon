@@ -146,6 +146,11 @@ Reached through the Express API as `POST /api/chat`, `GET /api/chat/health`, and
 `POST /api/chat/search` (staff only — it exposes the knowledge base a chunk at a
 time).
 
+The web app consumes `/api/chat` through `frontend/components/ChatWidget.js`,
+which renders `origin` as a badge and `sources` as expandable citations. That
+pairing is the point: the agent refuses to invent answers, and the UI is what
+makes that visible to a guest.
+
 ## Configuration
 
 See `.env.example`. `BACKEND_URL` blank disables live lookups and answers purely
@@ -161,5 +166,5 @@ app/dates.py       "20 to 22 September", "tomorrow", "next friday for 3 nights"
 app/live.py        read-only client for the Express API
 app/main.py        FastAPI
 scripts/ingest.py  build and inspect data/index.json
-tests/test_agent.py  78 tests, doubling as the eval set
+tests/test_agent.py  81 tests, doubling as the eval set
 ```

@@ -34,6 +34,12 @@ FAQ_MODERATE = 0.5
 # tests/test_agent.py refuses and every documented question still answers.
 UNKNOWN_LIMIT = 0.5
 
+# Openers that mark a message as continuing the previous turn rather than
+# starting a new subject: "and the spa?", "what about 4 guests".
+CONTINUATION = re.compile(
+    r"^(and|or|also|but|then|what about|how about|what if|ok|okay)\b", re.IGNORECASE
+)
+
 REFUSAL = (
     "I could not find that in the hotel document, so I would rather not guess. "
     "Reception can help directly on +91 22 4567 8900 or "
@@ -118,13 +124,31 @@ class Answerer:
         # Only if the message cannot stand on its own is the previous turn worth
         # borrowing. Blending it in unconditionally makes "and the spa?" inherit
         # the earlier subject and answer about the pool.
-        if result is None and context:
+        if result is None and context and self._should_borrow(question):
             result = await self._respond(f"{context} {question}", today)
 
         return result or Answer(
             text=REFUSAL, origin="none", confidence=0.0,
             suggestions=_DEFAULT_SUGGESTIONS,
         )
+
+    def _should_borrow(self, question: str) -> bool:
+        """Whether an unanswerable message is a follow-up needing the prior turn.
+
+        This guard matters more than it looks. Without it, "do you allow pets?"
+        asked after an availability search falls through to the combined text,
+        which still contains dates and a room noun -- and the guest gets the
+        previous availability answer to a question about pets. Merging two
+        questions dilutes the out-of-scope signal, so the decision has to be
+        made on the message alone, before merging.
+        """
+        # Out of scope on its own terms: context cannot rescue it, and
+        # borrowing would answer a question the guest did not ask.
+        if self.retriever.unknown_ratio(question) >= UNKNOWN_LIMIT:
+            return False
+        # A genuine follow-up either opens with a continuation word or is too
+        # short to carry a subject.
+        return bool(CONTINUATION.match(question.strip())) or len(question.split()) <= 3
 
     async def _respond(self, question: str, today: date | None) -> Answer | None:
         """One pass down the composer ladder. None means nothing matched."""

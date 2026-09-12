@@ -49,28 +49,36 @@ const ORIGIN_LABEL = {
 /**
  * The agent writes plain text, using "- " for lists. Rendering those as a real
  * list keeps a four-clause cancellation policy readable.
+ *
+ * Lines are grouped in the order they arrive rather than collected by kind: an
+ * availability answer closes with "Check-in is 2:00 PM" *after* its list, and
+ * gathering all the prose together would quietly hoist that above the rooms.
  */
 function AnswerBody({ text }) {
-  const lines = text.split('\n').filter((line) => line.trim());
-  const bullets = lines.filter((line) => line.trimStart().startsWith('- '));
-
-  if (bullets.length < 2) {
-    return <p className="whitespace-pre-line">{text}</p>;
+  const blocks = [];
+  for (const line of text.split('\n')) {
+    if (!line.trim()) continue;
+    const bullet = line.trimStart().startsWith('- ');
+    const current = blocks[blocks.length - 1];
+    if (current && current.bullet === bullet) current.lines.push(line);
+    else blocks.push({ bullet, lines: [line] });
   }
 
-  const intro = lines.filter((line) => !line.trimStart().startsWith('- '));
-  return (
-    <>
-      {intro.length > 0 && <p className="whitespace-pre-line">{intro.join('\n')}</p>}
-      <ul className={intro.length > 0 ? 'mt-2 space-y-1.5' : 'space-y-1.5'}>
-        {bullets.map((line, i) => (
-          <li key={i} className="flex gap-2">
+  return blocks.map((block, i) =>
+    block.bullet ? (
+      <ul key={i} className={i > 0 ? 'mt-2 space-y-1.5' : 'space-y-1.5'}>
+        {block.lines.map((line, j) => (
+          <li key={j} className="flex gap-2">
             <span aria-hidden className="mt-[0.45rem] size-1 shrink-0 rounded-full bg-sky-500" />
             <span>{line.trimStart().slice(2)}</span>
           </li>
         ))}
       </ul>
-    </>
+    ) : (
+      <p key={i} className={i > 0 ? 'mt-2 whitespace-pre-line' : 'whitespace-pre-line'}>
+        {block.lines.join('\n')}
+      </p>
+    )
   );
 }
 

@@ -183,9 +183,9 @@ export function ConciergeCharacter({ state = 'idle', className = '', title }) {
             {/* Brass band */}
             <path d="M36 43h48" stroke="var(--color-brass-400)" strokeWidth="5" strokeLinecap="round" />
             <path d="M36 43h48" stroke="var(--color-ink-900)" strokeWidth="2.2" strokeLinecap="round" />
-            {/* The Meridian "M" badge */}
+            {/* The Meridian "M" badge: up, dip, up, down. */}
             <path
-              d="M55 33l2.5 6 2.5-4 2.5 4 2.5-6"
+              d="M55 39l2.5-6 2.5 4 2.5-4 2.5 6"
               fill="none"
               stroke="var(--color-brass-200)"
               strokeWidth="2"

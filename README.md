@@ -182,7 +182,7 @@ agent/                         # RAG chatbot (Python, no LLM)
 │   ├── live.py                # read-only client for this API
 │   └── main.py                # FastAPI
 ├── scripts/ingest.py          # build and inspect data/index.json
-└── tests/test_agent.py        # 78 tests, doubling as the eval set
+└── tests/test_agent.py        # 81 tests, doubling as the eval set
 
 frontend/
 ├── app/
@@ -192,6 +192,8 @@ frontend/
 │   └── dashboard/             # role-gated: overview, bookings, front desk,
 │                              #   rooms, cancellations, hotels, users
 ├── components/                # AuthProvider, Navbar, Sidebar, UI kit
+│   ├── ChatWidget.js          # the floating concierge, talks to /api/chat
+│   └── ConciergeCharacter.js  # animated SVG character (CSS-driven)
 └── lib/                       # api client, formatting, constants
 ```
 
@@ -423,3 +425,18 @@ curl -X POST http://localhost:4000/api/chat   -H "Content-Type: application/json
 
 The backend does not require the agent: with `AGENT_URL` unset or the service down,
 `/api/chat` reports 503 and everything else runs normally.
+
+### In the app
+
+A floating concierge — **Aarav** — sits bottom-right on every page except sign-in and
+registration. He is an inline SVG drawn in the brand palette and animated entirely in
+CSS: he breathes and blinks at rest, waves occasionally, glances up with three pulsing
+dots while the agent is working, and nods while an answer lands. No animation library,
+no timers, nothing re-renders to drive it, and the `prefers-reduced-motion` rule already
+in `globals.css` stops all of it — his resting pose is his correct static appearance, so
+freezing the animation leaves him composed rather than mid-blink.
+
+Every answer shows its provenance: a green **Live availability** badge when the numbers
+came from the database, a **From the hotel document** badge when they came from the PDF,
+and a tap-to-expand list of the exact sections behind the claim. The agent is built never
+to invent an answer; the badges and citations are what make that legible to a guest.

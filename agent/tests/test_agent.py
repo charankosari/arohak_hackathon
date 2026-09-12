@@ -261,6 +261,22 @@ def test_follow_up_keeps_its_own_subject(bot):
     assert "Swimming Pool" not in result.text
 
 
+@pytest.mark.parametrize(
+    "question,context",
+    [
+        # The bug this guards: the merged text still holds dates and a room
+        # noun, so the guest got the previous availability answer.
+        ("do you allow pets?", "any rooms from 25 to 27 October for 3 guests?"),
+        ("are pets allowed", "which room suits 2 guests"),
+        ("is there a casino", "what time does the pool open"),
+    ],
+)
+def test_out_of_scope_question_is_not_rescued_by_context(bot, question, context):
+    """Context must never turn "not in the document" into someone else's answer."""
+    result = asyncio.run(bot.answer(question, today=TODAY, context=context))
+    assert result.text == REFUSAL, f"{question!r} after {context!r} -> {result.text!r}"
+
+
 def test_follow_up_borrows_context_only_when_it_must(bot):
     """"what about 4 guests" cannot stand alone, so the prior turn is used."""
     result = asyncio.run(
