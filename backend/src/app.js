@@ -71,6 +71,7 @@ export function createApp() {
       rooms: '/api/rooms',
       bookings: '/api/bookings',
       cancellationRequests: '/api/cancellation-requests',
+      chat: '/api/chat',
     });
   });
 

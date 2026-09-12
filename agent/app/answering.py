@@ -15,6 +15,7 @@ threshold it says the document does not cover the question instead of guessing.
 from __future__ import annotations
 
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
 
@@ -27,6 +28,11 @@ from .retrieval import Retriever, tokenize
 # FAQ question overlap above which the authored answer is served verbatim.
 FAQ_STRONG = 0.72
 FAQ_MODERATE = 0.5
+
+# Refuse once this share of the question's content words are foreign to the
+# document. Measured, not guessed: at 0.5 every out-of-scope probe in
+# tests/test_agent.py refuses and every documented question still answers.
+UNKNOWN_LIMIT = 0.5
 
 REFUSAL = (
     "I could not find that in the hotel document, so I would rather not guess. "
@@ -64,6 +70,15 @@ def _money(amount: float, currency: str = "INR") -> str:
     return f"{currency} {amount:,.0f}"
 
 
+def _room_lines(rooms: list[Room], features: bool = True) -> str:
+    return "\n".join(
+        f"- {r.room_type}: sleeps {r.capacity}, "
+        f"{_money(r.price_per_night, r.currency)} per night"
+        + (f" - {r.features}" if features else "")
+        for r in rooms
+    )
+
+
 def _overlap(question: str, target: str) -> float:
     """Share of the target's terms the question covers.
 
@@ -86,7 +101,9 @@ class Answerer:
 
     # -- entry point -------------------------------------------------------
 
-    async def answer(self, question: str, today: date | None = None) -> Answer:
+    async def answer(
+        self, question: str, today: date | None = None, context: str | None = None
+    ) -> Answer:
         question = (question or "").strip()
         if not question:
             return Answer(
@@ -96,6 +113,21 @@ class Answerer:
                 suggestions=_DEFAULT_SUGGESTIONS,
             )
 
+        result = await self._respond(question, today)
+
+        # Only if the message cannot stand on its own is the previous turn worth
+        # borrowing. Blending it in unconditionally makes "and the spa?" inherit
+        # the earlier subject and answer about the pool.
+        if result is None and context:
+            result = await self._respond(f"{context} {question}", today)
+
+        return result or Answer(
+            text=REFUSAL, origin="none", confidence=0.0,
+            suggestions=_DEFAULT_SUGGESTIONS,
+        )
+
+    async def _respond(self, question: str, today: date | None) -> Answer | None:
+        """One pass down the composer ladder. None means nothing matched."""
         for composer in (
             self._greeting,
             self._room_facts,
@@ -112,20 +144,29 @@ class Answerer:
         if faq and faq[1] >= FAQ_STRONG:
             return faq[0]
 
-        if (result := self._retrieved(question)) is not None:
-            return result
+        # Half or more of the question's content words absent from the document
+        # means it is asking about something the document does not cover. Say
+        # so rather than returning the loosely-related passages BM25 will
+        # always find (PDF section 12).
+        if self.retriever.unknown_ratio(question) < UNKNOWN_LIMIT:
+            if (result := self._retrieved(question)) is not None:
+                return result
+            if faq and faq[1] >= FAQ_MODERATE:
+                return faq[0]
 
-        if faq and faq[1] >= FAQ_MODERATE:
-            return faq[0]
-
-        return Answer(text=REFUSAL, origin="none", confidence=0.0,
-                      suggestions=_DEFAULT_SUGGESTIONS)
+        return None
 
     # -- composers ---------------------------------------------------------
 
     def _greeting(self, question: str) -> Answer | None:
-        lowered = question.lower().strip(" !.?")
-        if re.fullmatch(r"(hi|hello|hey|hiya|good (morning|afternoon|evening))\b.*", lowered):
+        # Matched whole, not as a prefix: "hi, what time is check-in?" is a
+        # question wearing a greeting, and must fall through to be answered.
+        lowered = question.lower().strip(" !.?,")
+        if re.fullmatch(
+            r"(hi|hello|hey|hiya|yo|greetings|good (morning|afternoon|evening))"
+            r"([ ,]+there)?",
+            lowered,
+        ):
             name = self.kb.overview.get("Hotel Name", "The Meridian Grand Mumbai")
             return Answer(
                 text=(
@@ -136,7 +177,11 @@ class Answerer:
                 confidence=1.0,
                 suggestions=_DEFAULT_SUGGESTIONS,
             )
-        if re.fullmatch(r"(thanks|thank you|ty|cheers|bye|goodbye)\b.*", lowered):
+        if re.fullmatch(
+            r"(thanks|thank you|thankyou|ty|cheers|bye|goodbye)"
+            r"( so much| a lot| very much)?",
+            lowered,
+        ):
             return Answer(
                 text="Happy to help. Enjoy your stay at The Meridian Grand Mumbai.",
                 origin="none",
@@ -147,15 +192,25 @@ class Answerer:
     async def _live_availability(self, question: str, today: date | None) -> Answer | None:
         """Availability questions go to the live API, never to the PDF."""
         lowered = question.lower()
-        asks_availability = re.search(
-            r"\bavailab\w+\b|\bvacan\w+\b|\bfree\b|\bbook\w*\b|\breserv\w+\b|"
-            r"\bany rooms?\b|\bstay\b|\bcan i get\b",
+
+        # Availability needs a room noun plus either an availability verb or
+        # concrete dates. Without that pairing, "is wifi free", "are vegan
+        # meals available" and "can I cancel my booking" all read as
+        # availability questions; with it, "any rooms from 25 to 27 October"
+        # still does even though it names no verb.
+        subject = re.search(r"\brooms?\b|\bsuites?\b|\bnights?\b|\baccommodations?\b", lowered)
+        verb = re.search(
+            r"\bavailab\w+\b|\bvacan\w+\b|\bfree\b|\bopen\b|\bbook\w*\b|\breserv\w+\b|"
+            r"\bstay\b|\bget\b|\bwant\b|\blooking for\b",
             lowered,
         )
-        if not asks_availability:
+        # A cancellation or policy question mentioning rooms is not a search.
+        excluded = re.search(r"\bcancel\w*\b|\brefund\w*\b|\bpolic\w+\b|\bmodif\w+\b", lowered)
+        stay = parse_stay(question, today)
+
+        if not subject or excluded or not (verb or stay):
             return None
 
-        stay = parse_stay(question, today)
         if stay is None:
             return Answer(
                 text=(
@@ -185,10 +240,9 @@ class Answerer:
             # Backend down or the stay was rejected: answer from the document
             # and be explicit that this is not a live check.
             options = [r for r in self.kb.rooms if r.capacity >= guests]
-            listing = "\n".join(
-                f"- {r.room_type}: sleeps {r.capacity}, {_money(r.price_per_night, r.currency)} per night"
-                for r in options
-            ) or "- No room category in the document seats that many guests."
+            listing = _room_lines(options, features=False) or (
+                "- No room category in the document seats that many guests."
+            )
             return Answer(
                 text=(
                     f"I could not reach live availability for {window} just now. "
@@ -267,23 +321,30 @@ class Answerer:
             score,
         )
 
-    def _match_room(self, question: str) -> Room | None:
-        """Identify a room category named in the question, if unambiguous."""
+    def _match_rooms(self, question: str) -> list[Room]:
+        """Room categories named in the question, best-matching tier only.
+
+        "family suite" resolves to one room; a bare "suite" matches Executive
+        and Family equally and returns both, so the caller can list them
+        instead of silently picking one.
+        """
         lowered = question.lower()
         scored: list[tuple[int, Room]] = []
         for room in self.kb.rooms:
-            words = [w for w in tokenize(room.room_type)]
-            hits = sum(1 for w in words if re.search(rf"\b{re.escape(w)}\b", lowered))
+            words = tokenize(room.room_type)
+            # Trailing s? so "your suites" matches the Suite categories.
+            hits = sum(1 for w in words if re.search(rf"\b{re.escape(w)}s?\b", lowered))
             if hits:
                 scored.append((hits, room))
         if not scored:
-            return None
-        scored.sort(key=lambda pair: pair[0], reverse=True)
-        # "suite" alone matches Executive and Family equally: ambiguous, so let
-        # a later composer list the categories rather than pick one.
-        if len(scored) > 1 and scored[0][0] == scored[1][0]:
-            return None
-        return scored[0][1]
+            return []
+        best = max(hits for hits, _ in scored)
+        return [room for hits, room in scored if hits == best]
+
+    def _match_room(self, question: str) -> Room | None:
+        """The single room category named, or None when ambiguous."""
+        matches = self._match_rooms(question)
+        return matches[0] if len(matches) == 1 else None
 
     def _room_facts(self, question: str) -> Answer | None:
         """Answer price / capacity / suitability from the parsed room table."""
@@ -300,11 +361,16 @@ class Answerer:
             r"\bcapacit\w+\b|\bhow many\b|\bsleeps?\b|\bfit\b|\bmax\w*\b|\boccupan\w+\b",
             lowered,
         )
-        # "availability" is the live path's job, not the table's.
+        # Availability is the live path's job, not the table's. Concrete dates
+        # mean the same thing even without the word: "any rooms from 25 to 27
+        # October for 3 guests" is a search, not a request for the brochure.
         if re.search(r"\bavailab\w+\b|\bvacan\w+\b|\bbook\w*\b", lowered):
             return None
+        if parse_stay(question) is not None:
+            return None
 
-        room = self._match_room(question)
+        matches = self._match_rooms(question)
+        room = matches[0] if len(matches) == 1 else None
         guests = parse_guests(question)
 
         # "Can four guests stay in a Deluxe King?" -- a capacity verdict.
@@ -371,13 +437,8 @@ class Answerer:
                     origin="document",
                     confidence=0.9,
                 )
-            listing = "\n".join(
-                f"- {r.room_type}: sleeps {r.capacity}, "
-                f"{_money(r.price_per_night, r.currency)} per night - {r.features}"
-                for r in options
-            )
             return Answer(
-                text=f"These categories seat {guests} guests or more:\n{listing}",
+                text=f"These categories seat {guests} guests or more:\n{_room_lines(options)}",
                 sources=[source],
                 origin="document",
                 confidence=0.9,
@@ -390,21 +451,39 @@ class Answerer:
             r"\ball rooms?\b|\broom options?\b|\brooms? do you\b",
             lowered,
         )
-        if wants_listing or (asks_price and re.search(r"\brooms?\b", lowered) and not room):
-            listing = "\n".join(
-                f"- {r.room_type}: sleeps {r.capacity}, "
-                f"{_money(r.price_per_night, r.currency)} per night - {r.features}"
-                for r in self.kb.rooms
-            )
+        describes = re.search(
+            r"\btell me\b|\bdescribe\b|\bdetails?\b|\bwhat(?:'s| is| are)\b|\bshow me\b",
+            lowered,
+        )
+        # Naming a category is not the same as asking about it: "do suites have
+        # bathrobes" is an amenity question that happens to say "suites", and
+        # belongs to retrieval, not to the room table.
+        about_category = bool(asks_price or asks_capacity or wants_listing or describes)
+
+        # Several categories named at once ("your suites"): list exactly those
+        # rather than guessing which one the guest meant.
+        if len(matches) > 1 and about_category:
             return Answer(
-                text=f"The hotel has {len(self.kb.rooms)} room categories:\n{listing}",
+                text=(
+                    f"{len(matches)} categories match that:\n{_room_lines(matches)}"
+                ),
+                sources=[source],
+                origin="document",
+                confidence=0.88,
+            )
+        if wants_listing or (asks_price and re.search(r"\brooms?\b", lowered) and not room):
+            return Answer(
+                text=(
+                    f"The hotel has {len(self.kb.rooms)} room categories:\n"
+                    f"{_room_lines(self.kb.rooms)}"
+                ),
                 sources=[source],
                 origin="document",
                 confidence=0.9,
                 suggestions=["What is included in every room?", "Check availability"],
             )
 
-        if room:
+        if room and about_category:
             return Answer(
                 text=(
                     f"The {room.room_type} sleeps up to {room.capacity} guests at "
@@ -446,7 +525,8 @@ class Answerer:
         # included" is a food policy and belongs to the FAQ/retrieval path.
         if not re.search(
             r"\bopen\w*\b|\bhours?\b|\btimings?\b|\bwhen\b|\bwhat time\b|\bclose\w*\b|"
-            r"\bwhere\b|\bfloor\b|\bis there\b|\bdo you have\b|\bhave a\b|\bany\b",
+            r"\bwhere\b|\bfloor\b|\bis there\b|\bdo you have\b|\bhave a\b|\bany\b|"
+            r"\bappointments?\b|\bwalk ?-? ?ins?\b",
             lowered,
         ):
             return None
@@ -460,26 +540,56 @@ class Answerer:
 
     def _retrieved(self, question: str) -> Answer | None:
         """Fall back to the best-matching statements, quoted verbatim."""
-        hits = self.retriever.search(question, k=4)
+        hits = self.retriever.search(question, k=6)
         if not hits or hits[0].score < config.MIN_SCORE:
             return None
 
-        # Keep only hits close to the best one; a long tail of weak matches
-        # reads as padding and dilutes a correct top answer.
-        cutoff = hits[0].score * 0.55
-        kept = [h for h in hits if h.score >= cutoff][:3]
-
-        if len(kept) == 1:
-            body = kept[0].chunk.text
+        if (block := self._subsection_block(hits)) is not None:
+            chunks = block
         else:
-            body = "\n".join(f"- {h.chunk.text}" for h in kept)
+            # Keep only hits close to the best one; a long tail of weak matches
+            # reads as padding and dilutes a correct top answer.
+            cutoff = hits[0].score * 0.65
+            chunks = [h.chunk for h in hits if h.score >= cutoff][:3]
 
+        body = (
+            chunks[0].text
+            if len(chunks) == 1
+            else "\n".join(f"- {c.text}" for c in chunks)
+        )
         return Answer(
             text=body,
-            sources=[Source(h.chunk.citation, h.chunk.text) for h in kept],
+            sources=[Source(c.citation, c.text) for c in chunks],
             origin="document",
             confidence=min(0.9, round(hits[0].score / 12, 3)),
         )
+
+    def _subsection_block(self, hits: list) -> list | None:
+        """Return a whole policy subsection when the question lands on one.
+
+        A policy is a set of clauses that only makes sense together: "check-out
+        is 12:00 PM" alone is a misleading answer to "what if I leave at 4pm",
+        because the 50% late charge lives in a neighbouring bullet. When most
+        of the top hits come from one subsection, answer with all of it.
+        """
+        counts = Counter(
+            (h.chunk.section, h.chunk.subsection)
+            for h in hits[:5]
+            if h.chunk.subsection
+        )
+        if not counts:
+            return None
+
+        (section, subsection), count = counts.most_common(1)[0]
+        if count < 3:
+            return None
+
+        block = [
+            c for c in self.kb.chunks
+            if c.section == section and c.subsection == subsection
+        ]
+        # Too long and it stops being an answer and starts being the document.
+        return block if 1 < len(block) <= 6 else None
 
 
 _DEFAULT_SUGGESTIONS = [

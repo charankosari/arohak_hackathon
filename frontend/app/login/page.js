@@ -42,8 +42,8 @@ function LoginForm() {
   return (
     <AuthLayout
       eyebrow="Welcome back"
-      title="Sign In"
-      subtitle="Enter your details to continue to your dashboard."
+      title="Welcome back."
+      subtitle="Sign in to plan your next stay and manage your reservations."
       footer={
         <>
           Don&rsquo;t have an account?{' '}
@@ -102,8 +102,7 @@ function LoginForm() {
         </div>
 
         <p className="pt-1 text-center text-xs text-ink-400">
-          Guests, receptionists and administrators all sign in here — you land on the
-          dashboard for your role.
+          Your reservations and stay details, all in one place.
         </p>
       </form>
     </AuthLayout>

@@ -54,6 +54,12 @@ ALIASES: dict[str, tuple[str, ...]] = {
     r"\bairports?\b|\btransfers?\b|\bpick ?-? ?ups?\b|\btaxis?\b|\bcabs?\b|\bshuttles?\b": (
         "airport", "transfer", "concierge",
     ),
+    # "how far" asks for the distance line, not the transfer-booking line.
+    # Each alternative must also match the bare word, because unknown_ratio()
+    # tests these patterns one token at a time.
+    r"\bfar\b|\bdistances?\b|\bkms?\b|\bkilometres?\b|\bnear\w*\b": (
+        "km", "approximately",
+    ),
     r"\bspas?\b|\bmassages?\b": ("spa",),
     r"\brestaurants?\b|\bdining\b|\bfoods?\b|\beat\w*\b|\bmeals?\b|\bdinner\b|\blunch\b": (
         "restaurant", "dining", "food", "harbour",
@@ -70,6 +76,12 @@ ALIASES: dict[str, tuple[str, ...]] = {
     r"\blounges?\b|\brooftops?\b|\bbars?\b|\bdrinks?\b": ("rooftop", "lounge", "skyline"),
     r"\bbusiness\b|\bmeetings?\b|\bconference\b|\bwork\b": ("business", "centre"),
     r"\bhousekeep\w*\b|\bclean\w*\b": ("housekeeping",),
+    # The document says "complimentary" wherever a guest would say "free",
+    # and "open ... AM-PM" wherever they would say "timings".
+    r"\bfree\b|\bcomplimentary\b|\bincluded\b|\bno charge\b|\bgratis\b": (
+        "complimentary", "included",
+    ),
+    r"\btimings?\b|\bschedules?\b|\bopening\b|\bhours?\b": ("open", "hours"),
     r"\baddress\b|\blocat\w+\b|\bwhere\b": ("address", "road", "mumbai"),
     r"\bphones?\b|\bcontacts?\b|\bcall\b|\bnumbers?\b|\breach\b": ("contact", "number", "email"),
     r"\bguests?\b|\bpeople\b|\bpersons?\b|\boccupan\w+\b|\bsleeps?\b|\bcapacit\w+\b": (
@@ -86,18 +98,36 @@ ALIASES: dict[str, tuple[str, ...]] = {
 _WORD = re.compile(r"[a-z0-9]+")
 
 
-def tokenize(text: str) -> list[str]:
-    """Lowercase word tokens, with a joined variant for hyphenated terms.
+def stem(token: str) -> str:
+    """Strip a plural 's', so "bathrobes" finds "Bathrobe and slippers".
 
-    "check-in" yields check, in, checkin -- so the document matches whether the
-    guest writes "check in", "check-in" or "checkin".
+    Deliberately the crudest rule that works. It runs over the documents and
+    the query alike, so both sides land on the same form and an over-eager
+    strip costs nothing as long as it is consistent. "business" and "is" are
+    protected because -ss/-us/-is endings are almost never plurals.
     """
-    lowered = text.lower()
-    tokens = [t for t in _WORD.findall(lowered) if t not in STOPWORDS]
+    if len(token) > 4 and token.endswith("ies"):
+        return f"{token[:-3]}y"
+    if len(token) > 3 and token.endswith("s") and not token.endswith(("ss", "us", "is")):
+        return token[:-1]
+    return token
+
+
+def tokenize(text: str) -> list[str]:
+    """Lowercase, stopword-filtered, stemmed tokens.
+
+    Hyphenated terms also yield a joined variant, so "check-in" produces check,
+    in, checkin -- the document matches whether the guest writes "check in",
+    "check-in" or "checkin".
+    """
+    # "4pm" -> "4", "pm": the document writes times as "2:00 PM", so without
+    # this split a guest's "4pm" is a word the corpus has never seen.
+    lowered = re.sub(r"\b(\d{1,2})\s*(am|pm)\b", r"\1 \2", text.lower())
+    tokens = [stem(t) for t in _WORD.findall(lowered) if t not in STOPWORDS]
     for joined in re.findall(r"[a-z]+(?:-[a-z]+)+", lowered):
         collapsed = joined.replace("-", "")
         if collapsed not in STOPWORDS:
-            tokens.append(collapsed)
+            tokens.append(stem(collapsed))
     return tokens
 
 
@@ -107,7 +137,7 @@ def expand_query(query: str) -> list[str]:
     lowered = query.lower()
     for pattern, additions in ALIASES.items():
         if re.search(pattern, lowered):
-            tokens.extend(additions)
+            tokens.extend(stem(a) for a in additions)
     return tokens
 
 
@@ -149,6 +179,36 @@ class Retriever:
                 continue
             total += self._idf.get(term, 0.0) * (f * (K1 + 1)) / (f + norm) * min(qf, 2)
         return total
+
+    def unknown_ratio(self, query: str) -> float:
+        """Share of the question's content words the document has never heard of.
+
+        This is the signal that separates "the document doesn't cover this"
+        from "the document covers this in different words". BM25 score alone
+        cannot: "can I get a helicopter transfer" scores as high as a good
+        question, because "transfer" matches strongly while "helicopter" -- the
+        word that actually decides the answer -- contributes nothing.
+
+        A word counts as known if it appears in the corpus or if one of the
+        alias expansions it triggers does, so "gym" is known via "fitness" and
+        "free" via "complimentary".
+        """
+        terms = set(tokenize(query))
+        if not terms:
+            return 0.0
+
+        unknown = 0
+        for term in terms:
+            if term in self._idf:
+                continue
+            aliased = any(
+                re.search(pattern, term)
+                and any(stem(addition) in self._idf for addition in additions)
+                for pattern, additions in ALIASES.items()
+            )
+            if not aliased:
+                unknown += 1
+        return unknown / len(terms)
 
     def search(self, query: str, k: int = 5) -> list[Hit]:
         tokens = expand_query(query)

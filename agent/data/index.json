@@ -414,61 +414,7 @@
       "citation": "Section 3 - Cancellation and Modification Policy"
     },
     {
-      "id": "s4-c31",
-      "text": "2 guests",
-      "section": 4,
-      "section_title": "Room Categories",
-      "subsection": "Deluxe King",
-      "kind": "fact",
-      "citation": "Section 4 - Room Categories > Deluxe King"
-    },
-    {
-      "id": "s4-c32",
-      "text": "2 guests",
-      "section": 4,
-      "section_title": "Room Categories",
-      "subsection": "Deluxe Twin",
-      "kind": "fact",
-      "citation": "Section 4 - Room Categories > Deluxe Twin"
-    },
-    {
-      "id": "s4-c33",
-      "text": "Two twin beds, city view, work desk",
-      "section": 4,
-      "section_title": "Room Categories",
-      "subsection": "INR 8,500",
-      "kind": "fact",
-      "citation": "Section 4 - Room Categories > INR 8,500"
-    },
-    {
-      "id": "s4-c34",
-      "text": "3 guests",
-      "section": 4,
-      "section_title": "Room Categories",
-      "subsection": "Premier Sea View",
-      "kind": "fact",
-      "citation": "Section 4 - Room Categories > Premier Sea View"
-    },
-    {
-      "id": "s4-c35",
-      "text": "3 guests",
-      "section": 4,
-      "section_title": "Room Categories",
-      "subsection": "Executive Suite",
-      "kind": "fact",
-      "citation": "Section 4 - Room Categories > Executive Suite"
-    },
-    {
-      "id": "s4-c36",
-      "text": "4 guests",
-      "section": 4,
-      "section_title": "Room Categories",
-      "subsection": "Family Suite",
-      "kind": "fact",
-      "citation": "Section 4 - Room Categories > Family Suite"
-    },
-    {
-      "id": "s5-c37",
+      "id": "s5-c31",
       "text": "All room categories include:",
       "section": 5,
       "section_title": "Room Amenities",
@@ -477,34 +423,133 @@
       "citation": "Section 5 - Room Amenities"
     },
     {
-      "id": "s5-c38",
+      "id": "s5-c32",
+      "text": "Complimentary Wi-Fi",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities"
+    },
+    {
+      "id": "s5-c33",
+      "text": "Air conditioning",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities"
+    },
+    {
+      "id": "s5-c34",
       "text": "Smart television with local and international channels",
       "section": 5,
       "section_title": "Room Amenities",
-      "subsection": "Air conditioning",
+      "subsection": null,
       "kind": "fact",
-      "citation": "Section 5 - Room Amenities > Air conditioning"
+      "citation": "Section 5 - Room Amenities"
+    },
+    {
+      "id": "s5-c35",
+      "text": "Electric kettle and tea/coffee setup",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities"
+    },
+    {
+      "id": "s5-c36",
+      "text": "In-room safe",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities"
+    },
+    {
+      "id": "s5-c37",
+      "text": "Hair dryer",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities"
+    },
+    {
+      "id": "s5-c38",
+      "text": "Mini refrigerator",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities"
     },
     {
       "id": "s5-c39",
       "text": "Complimentary bottled water (2 bottles per night)",
       "section": 5,
       "section_title": "Room Amenities",
-      "subsection": "Mini refrigerator",
+      "subsection": null,
       "kind": "fact",
-      "citation": "Section 5 - Room Amenities > Mini refrigerator"
+      "citation": "Section 5 - Room Amenities"
     },
     {
       "id": "s5-c40",
+      "text": "Daily housekeeping",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities"
+    },
+    {
+      "id": "s5-c41",
       "text": "Executive Suite and Family Suite additionally include:",
       "section": 5,
       "section_title": "Room Amenities",
-      "subsection": "Daily housekeeping",
+      "subsection": null,
       "kind": "fact",
-      "citation": "Section 5 - Room Amenities > Daily housekeeping"
+      "citation": "Section 5 - Room Amenities"
     },
     {
-      "id": "s6-c41",
+      "id": "s5-c42",
+      "text": "Separate living area",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities"
+    },
+    {
+      "id": "s5-c43",
+      "text": "Bathrobe and slippers",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities"
+    },
+    {
+      "id": "s5-c44",
+      "text": "Premium bathroom amenities",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities"
+    },
+    {
+      "id": "s5-c45",
+      "text": "Evening turndown service",
+      "section": 5,
+      "section_title": "Room Amenities",
+      "subsection": null,
+      "kind": "fact",
+      "citation": "Section 5 - Room Amenities"
+    },
+    {
+      "id": "s6-c46",
       "text": "Restaurant - Harbour Table: Ground floor, open 6:30 AM-11:00 PM. Breakfast is served 6:30 AM-10:30 AM.",
       "section": 6,
       "section_title": "Hotel Facilities",
@@ -513,7 +558,7 @@
       "citation": "Section 6 - Hotel Facilities"
     },
     {
-      "id": "s6-c42",
+      "id": "s6-c47",
       "text": "Rooftop Lounge - Skyline 18: 18th floor, open 5:00 PM-12:00 AM. Entry is restricted to guests aged 21 and above after 8:00 PM.",
       "section": 6,
       "section_title": "Hotel Facilities",
@@ -522,7 +567,7 @@
       "citation": "Section 6 - Hotel Facilities"
     },
     {
-      "id": "s6-c43",
+      "id": "s6-c48",
       "text": "Fitness Centre: 3rd floor, open 24 hours for hotel guests.",
       "section": 6,
       "section_title": "Hotel Facilities",
@@ -531,7 +576,7 @@
       "citation": "Section 6 - Hotel Facilities"
     },
     {
-      "id": "s6-c44",
+      "id": "s6-c49",
       "text": "Swimming Pool: 4th floor, open 6:00 AM-9:00 PM. Children below 12 must be accompanied by an adult.",
       "section": 6,
       "section_title": "Hotel Facilities",
@@ -540,7 +585,7 @@
       "citation": "Section 6 - Hotel Facilities"
     },
     {
-      "id": "s6-c45",
+      "id": "s6-c50",
       "text": "Business Centre: 2nd floor, open 7:00 AM-10:00 PM.",
       "section": 6,
       "section_title": "Hotel Facilities",
@@ -549,7 +594,7 @@
       "citation": "Section 6 - Hotel Facilities"
     },
     {
-      "id": "s6-c46",
+      "id": "s6-c51",
       "text": "Spa: 4th floor, open 10:00 AM-9:00 PM. Advance appointments are recommended.",
       "section": 6,
       "section_title": "Hotel Facilities",
@@ -558,7 +603,7 @@
       "citation": "Section 6 - Hotel Facilities"
     },
     {
-      "id": "s7-c47",
+      "id": "s7-c52",
       "text": "Basement parking is available for hotel guests.",
       "section": 7,
       "section_title": "Parking and Transportation",
@@ -567,7 +612,7 @@
       "citation": "Section 7 - Parking and Transportation"
     },
     {
-      "id": "s7-c48",
+      "id": "s7-c53",
       "text": "Parking is complimentary for registered hotel guests.",
       "section": 7,
       "section_title": "Parking and Transportation",
@@ -576,7 +621,7 @@
       "citation": "Section 7 - Parking and Transportation"
     },
     {
-      "id": "s7-c49",
+      "id": "s7-c54",
       "text": "Parking spaces are subject to availability and cannot be reserved in advance.",
       "section": 7,
       "section_title": "Parking and Transportation",
@@ -585,7 +630,7 @@
       "citation": "Section 7 - Parking and Transportation"
     },
     {
-      "id": "s7-c50",
+      "id": "s7-c55",
       "text": "The hotel is approximately 25 km from Chhatrapati Shivaji Maharaj International Airport, depending on traffic.",
       "section": 7,
       "section_title": "Parking and Transportation",
@@ -594,7 +639,7 @@
       "citation": "Section 7 - Parking and Transportation"
     },
     {
-      "id": "s7-c51",
+      "id": "s7-c56",
       "text": "Airport transfers can be arranged through the concierge at an additional charge.",
       "section": 7,
       "section_title": "Parking and Transportation",
@@ -603,7 +648,7 @@
       "citation": "Section 7 - Parking and Transportation"
     },
     {
-      "id": "s7-c52",
+      "id": "s7-c57",
       "text": "Airport transfer requests should ideally be submitted at least 6 hours before pickup.",
       "section": 7,
       "section_title": "Parking and Transportation",
@@ -612,7 +657,7 @@
       "citation": "Section 7 - Parking and Transportation"
     },
     {
-      "id": "s8-c53",
+      "id": "s8-c58",
       "text": "Breakfast buffet is available at Harbour Table from 6:30 AM to 10:30 AM.",
       "section": 8,
       "section_title": "Food and Beverage",
@@ -621,7 +666,7 @@
       "citation": "Section 8 - Food and Beverage"
     },
     {
-      "id": "s8-c54",
+      "id": "s8-c59",
       "text": "Breakfast is included in selected room packages only; guests should check their booking details.",
       "section": 8,
       "section_title": "Food and Beverage",
@@ -630,7 +675,7 @@
       "citation": "Section 8 - Food and Beverage"
     },
     {
-      "id": "s8-c55",
+      "id": "s8-c60",
       "text": "24-hour in-room dining is available.",
       "section": 8,
       "section_title": "Food and Beverage",
@@ -639,7 +684,7 @@
       "citation": "Section 8 - Food and Beverage"
     },
     {
-      "id": "s8-c56",
+      "id": "s8-c61",
       "text": "Vegetarian, vegan, Jain, and selected allergy-sensitive meal options are available on request.",
       "section": 8,
       "section_title": "Food and Beverage",
@@ -648,7 +693,7 @@
       "citation": "Section 8 - Food and Beverage"
     },
     {
-      "id": "s8-c57",
+      "id": "s8-c62",
       "text": "Guests should inform the restaurant about serious food allergies before ordering.",
       "section": 8,
       "section_title": "Food and Beverage",
@@ -657,7 +702,7 @@
       "citation": "Section 8 - Food and Beverage"
     },
     {
-      "id": "s9-c58",
+      "id": "s9-c63",
       "text": "Complimentary Wi-Fi is available throughout guest rooms and common areas.",
       "section": 9,
       "section_title": "Wi-Fi and Connectivity",
@@ -666,7 +711,7 @@
       "citation": "Section 9 - Wi-Fi and Connectivity"
     },
     {
-      "id": "s9-c59",
+      "id": "s9-c64",
       "text": "The guest Wi-Fi network is named MeridianGuest.",
       "section": 9,
       "section_title": "Wi-Fi and Connectivity",
@@ -675,7 +720,7 @@
       "citation": "Section 9 - Wi-Fi and Connectivity"
     },
     {
-      "id": "s9-c60",
+      "id": "s9-c65",
       "text": "Guests receive the Wi-Fi access details at check-in.",
       "section": 9,
       "section_title": "Wi-Fi and Connectivity",
@@ -684,7 +729,7 @@
       "citation": "Section 9 - Wi-Fi and Connectivity"
     },
     {
-      "id": "s9-c61",
+      "id": "s9-c66",
       "text": "For connectivity problems, guests can contact reception or the IT support desk.",
       "section": 9,
       "section_title": "Wi-Fi and Connectivity",
@@ -693,7 +738,7 @@
       "citation": "Section 9 - Wi-Fi and Connectivity"
     },
     {
-      "id": "s10-c62",
+      "id": "s10-c67",
       "text": "Accessible rooms are available in selected room categories.",
       "section": 10,
       "section_title": "Accessibility",
@@ -702,7 +747,7 @@
       "citation": "Section 10 - Accessibility"
     },
     {
-      "id": "s10-c63",
+      "id": "s10-c68",
       "text": "The hotel has wheelchair-accessible public areas and elevators.",
       "section": 10,
       "section_title": "Accessibility",
@@ -711,7 +756,7 @@
       "citation": "Section 10 - Accessibility"
     },
     {
-      "id": "s10-c64",
+      "id": "s10-c69",
       "text": "Guests requiring an accessible room should mention the requirement while booking.",
       "section": 10,
       "section_title": "Accessibility",
@@ -720,7 +765,7 @@
       "citation": "Section 10 - Accessibility"
     },
     {
-      "id": "s10-c65",
+      "id": "s10-c70",
       "text": "Accessibility requests are subject to room availability and should be confirmed with the hotel.",
       "section": 10,
       "section_title": "Accessibility",
@@ -729,7 +774,7 @@
       "citation": "Section 10 - Accessibility"
     },
     {
-      "id": "s12-c66",
+      "id": "s12-c71",
       "text": "The chatbot should retrieve relevant passages from this PDF before answering policy, facility, room, or FAQ questions.",
       "section": 12,
       "section_title": "RAG Grounding Rules for Candidates",
@@ -738,7 +783,7 @@
       "citation": "Section 12 - RAG Grounding Rules for Candidates"
     },
     {
-      "id": "s12-c67",
+      "id": "s12-c72",
       "text": "Answers should be grounded in the retrieved content.",
       "section": 12,
       "section_title": "RAG Grounding Rules for Candidates",
@@ -747,7 +792,7 @@
       "citation": "Section 12 - RAG Grounding Rules for Candidates"
     },
     {
-      "id": "s12-c68",
+      "id": "s12-c73",
       "text": "The chatbot should not invent hotel policies, amenities, prices, timings, or facilities that are not present in the PDF.",
       "section": 12,
       "section_title": "RAG Grounding Rules for Candidates",
@@ -756,7 +801,7 @@
       "citation": "Section 12 - RAG Grounding Rules for Candidates"
     },
     {
-      "id": "s12-c69",
+      "id": "s12-c74",
       "text": "When the PDF does not contain an answer, the chatbot should clearly state that the information is unavailable in the provided document.",
       "section": 12,
       "section_title": "RAG Grounding Rules for Candidates",
@@ -765,7 +810,7 @@
       "citation": "Section 12 - RAG Grounding Rules for Candidates"
     },
     {
-      "id": "s12-c70",
+      "id": "s12-c75",
       "text": "Candidates should make the source of the answer traceable where practical, for example by showing the relevant document section or citation.",
       "section": 12,
       "section_title": "RAG Grounding Rules for Candidates",
@@ -774,7 +819,7 @@
       "citation": "Section 12 - RAG Grounding Rules for Candidates"
     },
     {
-      "id": "s12-c71",
+      "id": "s12-c76",
       "text": "The PDF is intended as a knowledge source only. Booking availability and actual booking actions should come from the application's live backend data, not from this PDF.",
       "section": 12,
       "section_title": "RAG Grounding Rules for Candidates",

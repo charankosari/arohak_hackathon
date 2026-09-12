@@ -46,12 +46,12 @@ export default function CancellationsPage() {
     <div className="space-y-6">
       <header>
         <h1 className="font-serif text-3xl font-bold text-ink-900">
-          {isStaff ? 'Cancellation requests' : 'My cancellation requests'}
+          {isStaff ? 'Cancellation requests' : 'Cancellations'}
         </h1>
         <p className="mt-1 text-sm text-ink-500">
           {isStaff
             ? 'Requests raised after the 24-hour direct-cancellation window closed. Approving cancels the booking; rejecting leaves it confirmed.'
-            : 'A request only appears here if you cancel within 24 hours of check-in. Cancel earlier than that and the booking is cancelled straight away, with no request needed.'}
+            : 'Plans change. Track requests made within 24 hours of check-in here. Earlier cancellations appear in My bookings.'}
         </p>
       </header>
 
@@ -68,6 +68,7 @@ export default function CancellationsPage() {
             <button
               key={option.key || 'all'}
               type="button"
+              aria-pressed={status === option.key}
               onClick={() => setStatus(option.key)}
               className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
                 status === option.key
@@ -91,7 +92,7 @@ export default function CancellationsPage() {
         ) : data.requests.length === 0 ? (
           <EmptyState
             icon={Inbox}
-            title="Nothing in this queue"
+            title={isStaff ? 'Nothing in this queue' : 'No cancellation requests'}
             action={
               !isStaff && (
                 <Link href="/dashboard/my-bookings">
@@ -104,7 +105,7 @@ export default function CancellationsPage() {
           >
             {isStaff
               ? 'Late cancellation requests from guests will appear here for review.'
-              : 'Nothing is waiting on staff. If you cancelled a booking more than 24 hours before check-in, it was cancelled immediately and will show as Cancelled under My bookings rather than appearing here.'}
+              : 'You have no requests in this view. Reservations cancelled more than 24 hours before check-in are listed under My bookings.'}
           </EmptyState>
         ) : (
           <ul className="divide-y divide-ink-100">

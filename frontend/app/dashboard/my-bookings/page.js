@@ -9,7 +9,6 @@ import {
   Badge,
   Button,
   Card,
-  CardHeader,
   EmptyState,
   Field,
   Input,
@@ -142,6 +141,7 @@ export default function MyBookingsPage() {
           <button
             key={option.key}
             type="button"
+            aria-pressed={filter === option.key}
             onClick={() => setFilter(option.key)}
             className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
               filter === option.key

@@ -30,12 +30,12 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const accountLinks = isCustomer
-    ? GUEST_LINKS
+    ? [{ ...GUEST_LINKS[0], label: 'My stays' }]
     : [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-cream-300/70 bg-cream-100/85 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-cream-300/70 bg-cream-50/95 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
         <Link href="/" className="flex items-center gap-2.5">
           <Image
             src="/logo.png"
@@ -55,15 +55,15 @@ export function Navbar() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {PUBLIC_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={`rounded-full px-4 py-2 text-sm transition-colors ${
                 pathname === link.href
-                  ? 'bg-sky-200 font-medium text-ink-900'
-                  : 'text-ink-600 hover:bg-sky-100 hover:text-ink-900'
+                  ? 'bg-cream-200 font-medium text-ink-900'
+                  : 'text-ink-600 hover:bg-cream-200 hover:text-ink-900'
               }`}
             >
               {link.label}
@@ -76,15 +76,15 @@ export function Navbar() {
             <div className="h-10 w-24 animate-pulse rounded-full bg-cream-200" />
           ) : user ? (
             <>
-              <span className="hidden items-center gap-1 sm:flex">
+              <span className="hidden items-center gap-1 lg:flex">
                 {accountLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
                     className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm transition-colors ${
-                      pathname.startsWith(link.href)
-                        ? 'bg-sky-200 font-medium text-ink-900'
-                        : 'text-ink-600 hover:bg-sky-100 hover:text-ink-900'
+                      (isCustomer ? pathname.startsWith('/dashboard') : pathname.startsWith(link.href))
+                        ? 'bg-cream-200 font-medium text-ink-900'
+                        : 'text-ink-600 hover:bg-cream-200 hover:text-ink-900'
                     }`}
                   >
                     <link.icon className="size-4" />
@@ -92,9 +92,9 @@ export function Navbar() {
                   </Link>
                 ))}
               </span>
-              <div className="hidden items-center gap-2.5 border-l border-cream-300 pl-3 sm:flex">
+              <div className="hidden items-center gap-2.5 border-l border-cream-300 pl-3 lg:flex">
                 <span
-                  className="grid size-9 place-items-center rounded-full bg-sky-300 text-xs font-semibold text-ink-900"
+                  className="grid size-9 place-items-center rounded-full bg-cream-300 text-xs font-semibold text-ink-900"
                   title={user.name}
                 >
                   {initials(user.name)}
@@ -119,10 +119,10 @@ export function Navbar() {
               </div>
             </>
           ) : (
-            <div className="hidden items-center gap-2 sm:flex">
+            <div className="hidden items-center gap-2 lg:flex">
               <Link
                 href="/login"
-                className="rounded-full px-4 py-2 text-sm text-ink-700 hover:bg-sky-100"
+                className="rounded-full px-4 py-2 text-sm text-ink-700 hover:bg-cream-200"
               >
                 Sign in
               </Link>
@@ -138,7 +138,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
-            className="rounded-full p-2 text-ink-600 hover:bg-sky-100 md:hidden"
+            className="rounded-full p-2 text-ink-600 hover:bg-cream-200 lg:hidden"
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
           >
@@ -148,14 +148,14 @@ export function Navbar() {
       </div>
 
       {menuOpen && (
-        <div className="border-t border-cream-300 bg-cream-100 px-4 py-3 md:hidden">
+        <div className="border-t border-cream-300 bg-cream-100 px-4 py-3 lg:hidden">
           <nav className="flex flex-col gap-1">
             {PUBLIC_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className="rounded-lg px-3 py-2 text-sm text-ink-700 hover:bg-sky-100"
+                className="rounded-lg px-3 py-2 text-sm text-ink-700 hover:bg-cream-200"
               >
                 {link.label}
               </Link>
@@ -167,7 +167,7 @@ export function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setMenuOpen(false)}
-                    className="rounded-lg px-3 py-2 text-sm text-ink-700 hover:bg-sky-100"
+                    className="rounded-lg px-3 py-2 text-sm text-ink-700 hover:bg-cream-200"
                   >
                     {link.label}
                   </Link>

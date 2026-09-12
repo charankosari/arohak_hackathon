@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Check, CheckCircle2, Users } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Check, CheckCircle2, Clock3, MapPin, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
@@ -200,7 +200,7 @@ function RoomDetail() {
     <div className="min-h-screen bg-cream-100">
       <Navbar />
 
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div className="room-detail mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
         <Link
           href="/rooms"
           className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-800"
@@ -209,27 +209,24 @@ function RoomDetail() {
           All rooms
         </Link>
 
-        <div className="mt-5 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+        <header className="mt-7 mb-8 flex flex-wrap items-end justify-between gap-5">
+          <div>
+            <p className="mb-3 text-xs font-semibold tracking-[0.2em] text-brass-800 uppercase">Your private retreat</p>
+            <h1 className="font-serif text-4xl font-medium tracking-tight text-ink-900 sm:text-5xl">{room.roomType}</h1>
+            <p className="mt-3 flex items-center gap-2 text-sm text-ink-500"><MapPin className="size-4" aria-hidden />{room.hotel?.name ?? 'The Meridian Grand'}{room.hotel?.city ? ' · ' + room.hotel.city : ''}</p>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg border border-cream-300 bg-cream-50 px-4 py-2.5 text-sm text-ink-600"><Users className="size-4" aria-hidden />Up to {room.maxGuests} {room.maxGuests === 1 ? 'guest' : 'guests'}</div>
+        </header>
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1.65fr)_minmax(340px,1fr)] lg:gap-10">
           {/* Room details */}
           <div>
-            <Card className="overflow-hidden">
+            <section className="min-w-0">
               <RoomGallery room={room} />
 
-              <div className="p-6">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <h1 className="font-serif text-3xl font-bold text-ink-900">{room.roomType}</h1>
-                    <p className="mt-1.5 flex items-center gap-1.5 text-sm text-ink-500">
-                      <Users className="size-4" aria-hidden />
-                      Maximum {room.maxGuests} {room.maxGuests === 1 ? 'guest' : 'guests'}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-semibold text-ink-900">
-                      {money(room.pricePerNight)}
-                    </p>
-                    <p className="text-sm text-ink-500">per night</p>
-                  </div>
+              <div className="py-8">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <h2 className="font-serif text-3xl text-ink-900">A little room to unwind.</h2>
+                  <span className="text-xs tracking-wide text-ink-500">Room {room.roomNumber}</span>
                 </div>
 
                 {room.status !== 'AVAILABLE' && (
@@ -241,13 +238,13 @@ function RoomDetail() {
                 )}
 
                 {room.description && (
-                  <p className="mt-4 text-sm leading-relaxed text-ink-600">{room.description}</p>
+                  <p className="mt-4 max-w-2xl text-base leading-8 text-ink-600">{room.description}</p>
                 )}
 
                 {room.amenities?.length > 0 && (
-                  <div className="mt-6">
-                    <h2 className="text-sm font-semibold text-ink-900">Room amenities</h2>
-                    <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <div className="mt-8 border-t border-cream-300 pt-7">
+                    <h2 className="font-serif text-2xl text-ink-900">Thoughtful comforts</h2>
+                    <ul className="mt-5 grid gap-x-6 gap-y-4 sm:grid-cols-2">
                       {room.amenities.map((amenity) => (
                         <li key={amenity} className="flex items-start gap-2 text-sm text-ink-600">
                           <Check className="mt-0.5 size-4 shrink-0 text-brass-500" aria-hidden />
@@ -268,17 +265,19 @@ function RoomDetail() {
                   </div>
                 )}
               </div>
-            </Card>
+            </section>
           </div>
 
           {/* Booking panel */}
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <Card className="overflow-hidden">
-              <div className="border-b border-ink-100 px-5 py-4">
-                <h2 className="font-serif text-lg font-semibold text-ink-900">Reserve this room</h2>
+            <Card className="reservation-panel !rounded-xl !border-cream-400 !bg-cream-50">
+              <div className="border-b border-cream-300 px-6 pt-6 pb-5 sm:px-7">
+                <p className="text-xs font-medium tracking-[0.16em] text-brass-800 uppercase">Make it your stay</p>
+                <div className="mt-3 flex items-baseline gap-2"><span className="numerals text-3xl font-semibold tracking-tight text-ink-900">{money(room.pricePerNight)}</span><span className="text-sm text-ink-500">/ night</span></div>
+                <h2 className="mt-2 text-sm text-ink-500">Reserve your {room.roomType.toLowerCase()}</h2>
               </div>
 
-              <form onSubmit={onBook} className="space-y-4 p-5">
+              <form onSubmit={onBook} className="space-y-5 p-6 sm:p-7">
                 {error && <Alert tone="error">{error}</Alert>}
 
                 {/* Availability for the dates currently selected. */}
@@ -315,7 +314,7 @@ function RoomDetail() {
                 )}
 
                 {!datesInvalid && !unavailable && availability && (
-                  <p className="flex items-center gap-1.5 text-sm text-emerald-700">
+                  <p role="status" className="flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-800">
                     <Check className="size-4" aria-hidden />
                     Available for these dates
                   </p>
@@ -323,7 +322,7 @@ function RoomDetail() {
 
                 {/* Same calendar and listbox as the search bar, so the
                     booking flow feels like one continuous interface. */}
-                <div className="rounded-2xl border border-cream-300 px-4 py-3">
+                <div className="rounded-lg border border-cream-400 bg-white px-4 py-3">
                   <DateRangePicker
                     checkIn={checkIn}
                     checkOut={checkOut}
@@ -357,7 +356,7 @@ function RoomDetail() {
                   </div>
                 </Field>
 
-                <Field label="Special requests" hint="Optional">
+                <Field label="Special requests (optional)" hint="We’ll do our best to accommodate your preferences.">
                   <Textarea
                     value={specialRequests}
                     onChange={(e) => setSpecialRequests(e.target.value)}
@@ -367,7 +366,7 @@ function RoomDetail() {
                 </Field>
 
                 {/* Price breakdown */}
-                <div className="space-y-1.5 rounded-lg bg-ink-50 p-4 text-sm">
+                <div className="space-y-3 border-t border-cream-300 pt-5 text-sm">
                   <div className="flex justify-between text-ink-600">
                     <span>
                       {money(room.pricePerNight)} &times; {nights}{' '}
@@ -375,7 +374,7 @@ function RoomDetail() {
                     </span>
                     <span>{money(total)}</span>
                   </div>
-                  <div className="flex justify-between border-t border-ink-200 pt-1.5 font-semibold text-ink-900">
+                  <div className="flex justify-between border-t border-cream-300 pt-3 text-lg font-semibold text-ink-900">
                     <span>Total</span>
                     <span>{money(total)}</span>
                   </div>
@@ -383,11 +382,11 @@ function RoomDetail() {
 
                 <Button
                   type="submit"
-                  variant="brass"
+                  variant="primary"
                   size="lg"
                   loading={submitting || checking}
                   disabled={!canBook || authLoading}
-                  className="w-full"
+                  className="w-full !rounded-lg py-3.5"
                 >
                   {checking
                     ? 'Checking availability'
@@ -398,14 +397,16 @@ function RoomDetail() {
                         : isStaff
                           ? 'Book for guest'
                           : 'Confirm booking'}
+                  {!checking && !submitting && !unavailable && <ArrowUpRight className="size-4" aria-hidden />}
                 </Button>
 
-                <p className="text-center text-xs text-ink-400">
+                <p className="text-center text-xs leading-5 text-ink-500">
                   Free cancellation until 24 hours before check-in.
                 </p>
               </form>
             </Card>
 
+            <div className="mt-5 flex justify-center gap-5 text-xs text-ink-500"><span className="flex items-center gap-1.5"><Clock3 className="size-3.5" aria-hidden />Check-in 2:00 PM</span><span>Check-out 12:00 PM</span></div>
             {isStaff && (
               <Alert tone="info" className="mt-4 text-xs">
                 You are signed in as staff. This books the room under your own account - use the

@@ -10,9 +10,9 @@ env/
 .env
 .env.local
 
-# RAG index artifacts (regenerate with `python -m scripts.ingest`)
-backend/data/*.pkl
-backend/data/*.json
+# RAG index artifacts (regenerate with `cd agent && python -m scripts.ingest`)
+agent/data/*.json
+agent/data/*.pkl
 
 # Node / Next.js
 node_modules/

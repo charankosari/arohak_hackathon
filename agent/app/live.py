@@ -29,8 +29,11 @@ _ROOM_TYPES = "/api/rooms/types"
 
 
 class LiveBackend:
-    def __init__(self, base_url: str = "", timeout: float | None = None) -> None:
-        self.base_url = (base_url or config.BACKEND_URL).rstrip("/")
+    def __init__(self, base_url: str | None = None, timeout: float | None = None) -> None:
+        # None means "use the configured default"; an explicit "" disables live
+        # lookups, which is how tests pin the document-only path.
+        resolved = config.BACKEND_URL if base_url is None else base_url
+        self.base_url = resolved.rstrip("/")
         self.timeout = timeout if timeout is not None else config.BACKEND_TIMEOUT
 
     @property

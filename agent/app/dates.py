@@ -50,6 +50,14 @@ _MONTH_DAY = re.compile(
     rf"\b({_MONTH_NAMES})\s+(\d{{1,2}})(?:st|nd|rd|th)?\b(?:\s*,?\s*(\d{{4}}))?",
     re.IGNORECASE,
 )
+# "20 to 22 September" -- one month name serving both ends of the range.
+_DAY_RANGE = re.compile(
+    rf"\b(\d{{1,2}})(?:st|nd|rd|th)?\s*(?:to|-|until|till|through|and)\s*"
+    rf"(\d{{1,2}})(?:st|nd|rd|th)?\s+(?:of\s+)?({_MONTH_NAMES})\b\.?"
+    rf"(?:\s*,?\s*(\d{{4}}))?",
+    re.IGNORECASE,
+)
+
 # Day-first: Indian convention, and the hotel is in Mumbai.
 _NUMERIC = re.compile(r"\b(\d{1,2})[/.](\d{1,2})(?:[/.](\d{2,4}))?\b")
 
@@ -107,6 +115,24 @@ def _explicit_dates(text: str, today: date) -> list[date]:
             claimed.append(match.span())
         except ValueError:
             pass
+
+    # Before the single-date patterns: "20 to 22 September" would otherwise
+    # register only its second half.
+    for match in _DAY_RANGE.finditer(text):
+        if not free(match):
+            continue
+        first, second, month_name, year = match.groups()
+        month = MONTHS[month_name.lower()]
+        explicit_year = int(year) if year else None
+        start = _roll_forward(int(first), month, explicit_year, today)
+        end = _roll_forward(int(second), month, explicit_year, today)
+        if start and end:
+            # "22 to 20 September" is a slip, not a year-long stay.
+            if end <= start:
+                end = start + timedelta(days=1)
+            found.append((match.start(), start))
+            found.append((match.start() + 1, end))
+            claimed.append(match.span())
 
     for pattern, order in ((_DAY_MONTH, "dm"), (_MONTH_DAY, "md")):
         for match in pattern.finditer(text):

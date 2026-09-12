@@ -37,6 +37,19 @@ KEY_VALUE = re.compile(r"^([A-Z][A-Za-z/ \-]{2,45}):\s*(\S.*)$")
 
 
 @dataclass
+class Line:
+    """One logical line, remembering whether the PDF bulleted it.
+
+    Section 5's amenities ("Daily housekeeping", "In-room safe") look exactly
+    like subsection headings -- short, capitalised, no full stop -- and the
+    bullet marker is the only thing that distinguishes them.
+    """
+
+    text: str
+    bulleted: bool
+
+
+@dataclass
 class Chunk:
     """One retrievable statement plus the citation that makes it traceable."""
 
@@ -145,7 +158,7 @@ def _normalise(text: str) -> str:
     return text
 
 
-def extract_lines(pdf_path: Path) -> list[str]:
+def extract_lines(pdf_path: Path) -> list[Line]:
     """Read the PDF into logical lines: page furniture dropped, bullets joined.
 
     A bullet's text often wraps onto following lines with no marker, so an
@@ -157,7 +170,7 @@ def extract_lines(pdf_path: Path) -> list[str]:
     for page in reader.pages:
         raw_lines.extend(_normalise(page.extract_text() or "").split("\n"))
 
-    lines: list[str] = []
+    lines: list[Line] = []
     for raw in raw_lines:
         stripped = raw.strip().strip(BULLET_CHARS).strip()
         if not stripped or PAGE_NOISE.match(stripped):
@@ -173,15 +186,15 @@ def extract_lines(pdf_path: Path) -> list[str]:
             lines
             and not had_bullet
             and stripped[0].islower()
-            and not lines[-1].endswith((".", ":", "?", "!"))
+            and not lines[-1].text.endswith((".", ":", "?", "!"))
             and not SECTION_HEADING.match(stripped)
             and not FAQ_QUESTION.match(stripped)
             and not FAQ_ANSWER.match(stripped)
         )
         if continues:
-            lines[-1] = f"{lines[-1]} {stripped}"
+            lines[-1].text = f"{lines[-1].text} {stripped}"
         else:
-            lines.append(stripped)
+            lines.append(Line(text=stripped, bulleted=had_bullet))
 
     return lines
 
@@ -258,44 +271,55 @@ def _parse_faqs(lines: list[str]) -> list[Faq]:
     return faqs
 
 
-def parse(lines: list[str], source: str = "") -> KnowledgeBase:
+def parse(lines: list[Line], source: str = "") -> KnowledgeBase:
     """Group lines under their section heading and build typed records."""
     kb = KnowledgeBase(source=source)
 
     # Split into sections first; every downstream parser works on one section.
-    sections: list[tuple[int, str, list[str]]] = []
-    current: tuple[int, str, list[str]] | None = None
+    sections: list[tuple[int, str, list[Line]]] = []
+    current: tuple[int, str, list[Line]] | None = None
     for line in lines:
-        if heading := SECTION_HEADING.match(line):
+        if heading := SECTION_HEADING.match(line.text):
             current = (int(heading.group(1)), heading.group(2).strip(), [])
             sections.append(current)
         elif current is not None:
             current[2].append(line)
 
     for number, title, body in sections:
+        texts = [line.text for line in body]
         if number == 4:
-            kb.rooms = _parse_room_table(body)
+            kb.rooms = _parse_room_table(texts)
         elif number == 6:
-            kb.facilities = _parse_facilities(body)
+            kb.facilities = _parse_facilities(texts)
         elif number == 11:
-            kb.faqs = _parse_faqs(body)
+            kb.faqs = _parse_faqs(texts)
+
+        # Section 4 is a table. Its cells extract one per line ("Capacity",
+        # "2 guests", "INR 8,500"), which are meaningless as standalone
+        # retrievable text -- and actively harmful, since "4 guests" would be
+        # returned as if it were an answer. The rows are re-emitted below as
+        # whole sentences instead.
+        if number == 4:
+            continue
 
         subsection: str | None = None
         for line in body:
-            if _is_subheading(line):
-                subsection = line
+            # A bulleted line is always content, never a heading -- section 5's
+            # amenities are short title-case phrases that would otherwise be
+            # mistaken for subsections and lost.
+            if not line.bulleted and _is_subheading(line.text):
+                subsection = line.text
                 continue
-            if FAQ_QUESTION.match(line) or FAQ_ANSWER.match(line):
+            if FAQ_QUESTION.match(line.text) or FAQ_ANSWER.match(line.text):
                 continue  # FAQ pairs are emitted as single chunks below.
 
-            if kv := KEY_VALUE.match(line):
-                if number == 1:
-                    kb.overview[kv.group(1).strip()] = kv.group(2).strip()
+            if (kv := KEY_VALUE.match(line.text)) and number == 1:
+                kb.overview[kv.group(1).strip()] = kv.group(2).strip()
 
             kb.chunks.append(
                 Chunk(
                     id=f"s{number}-c{len(kb.chunks)}",
-                    text=line,
+                    text=line.text,
                     section=number,
                     section_title=title,
                     subsection=subsection,

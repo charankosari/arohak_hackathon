@@ -31,6 +31,13 @@ export const env = {
   cloudinaryApiKey: optional('CLOUDINARY_API_KEY', ''),
   cloudinaryApiSecret: optional('CLOUDINARY_API_SECRET', ''),
 
+  // Optional: the Python RAG chatbot in agent/. Without it, /api/chat reports
+  // 503 and the rest of the API is unaffected.
+  agentUrl: optional('AGENT_URL', 'http://localhost:8001').replace(/\/$/, ''),
+  // Must exceed the agent's own timeout back onto this API (5s by default),
+  // since an availability question round-trips agent -> API -> agent.
+  agentTimeoutMs: Number(optional('AGENT_TIMEOUT_MS', '15000')),
+
   jwtSecret: required('JWT_SECRET'),
   jwtExpiresIn: optional('JWT_EXPIRES_IN', '12h'),
 

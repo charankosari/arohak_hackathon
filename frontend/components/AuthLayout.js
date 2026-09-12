@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye, EyeOff, Quote } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -23,93 +23,26 @@ export function AuthLayout({ eyebrow, title, subtitle, children, footer }) {
   }, []);
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-to-br from-cream-100 via-sky-100 to-sky-200 px-3 py-6 sm:px-6 sm:py-10">
-      {/* Drifting blobs give the gradient some depth */}
-      <div
-        aria-hidden
-        className="blob animate-drift pointer-events-none absolute -top-32 -left-24 size-[30rem] bg-brass-200/40 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="blob-alt animate-drift pointer-events-none absolute -right-32 -bottom-40 size-[34rem] bg-sky-300/50 blur-3xl"
-      />
-
-      <div className="relative grid w-full max-w-5xl overflow-hidden rounded-[2rem] bg-cream-50 shadow-2xl ring-1 ring-white/60 lg:grid-cols-2">
-        {/* ------------------------------------------------------ Form */}
-        <div className="flex flex-col p-6 sm:p-10 lg:p-12">
-          <Link href="/" className="flex items-center gap-2.5 self-start">
-            <Image
-              src="/logo.png"
-              alt=""
-              width={40}
-              height={40}
-              priority
-              className="h-9 w-auto object-contain"
-            />
-            <span className="leading-tight">
-              <span className="block font-serif text-base font-semibold text-ink-900">
-                The Meridian Grand
-              </span>
-              <span className="block text-[10px] tracking-[0.18em] text-ink-400 uppercase">
-                Mumbai
-              </span>
-            </span>
+    <div className="auth-page min-h-dvh bg-cream-100 p-4 sm:p-8">
+      <div className="auth-shell mx-auto grid max-w-6xl overflow-hidden rounded-2xl border border-cream-300 bg-cream-50 lg:grid-cols-[1fr_0.95fr]">
+        <div className="flex flex-col px-6 py-8 sm:px-12 lg:px-16">
+          <Link href="/" className="flex items-center gap-3 self-start">
+            <Image src="/logo.png" alt="" width={42} height={42} priority />
+            <span><span className="block font-serif text-lg font-semibold">The Meridian Grand</span><span className="text-[10px] tracking-[0.24em] text-brass-800 uppercase">Mumbai</span></span>
           </Link>
-
-          <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">
-            <div className="text-center">
-              {eyebrow && (
-                <span className="marker-honey inline-block -rotate-1 font-serif text-sm text-ink-800">
-                  {eyebrow}
-                </span>
-              )}
-              <h1 className="mt-4 font-serif text-4xl font-bold text-ink-900">{title}</h1>
-              <p className="mt-2 text-sm text-ink-500">{subtitle}</p>
-            </div>
-
+          <div className="mx-auto w-full max-w-md flex-1 py-10 lg:py-12">
+            <p className="text-xs font-semibold tracking-[0.18em] text-brass-800 uppercase">{eyebrow}</p>
+            <h1 className="mt-3 font-serif text-4xl leading-tight tracking-tight sm:text-5xl">{title}</h1>
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink-500">{subtitle}</p>
             <div className="mt-8">{children}</div>
-
-            {footer && <div className="mt-6 text-center text-sm text-ink-500">{footer}</div>}
+            {footer && <div className="mt-7 border-t border-cream-300 pt-6 text-sm text-ink-500">{footer}</div>}
           </div>
+          <Link href="/" className="self-start text-xs text-ink-500 hover:text-ink-900">← Back to the hotel</Link>
         </div>
-
-        {/* -------------------------------------------------- Property */}
-        <aside className="relative hidden bg-linear-to-b from-sky-100 to-sky-200 lg:flex lg:flex-col">
-          <div className="relative z-10 px-10 pt-12 pb-2">
-            <Quote className="size-8 rotate-180 text-sky-500" aria-hidden />
-            <p className="mt-5 font-serif text-2xl leading-snug font-semibold text-ink-900">
-              {hotel?.description
-                ? hotel.description.split('.')[0] + '.'
-                : 'A seafront address on Marine Drive, with sea-view suites and a rooftop lounge on the eighteenth floor.'}
-            </p>
-
-            <div className="mt-6 flex items-center gap-3">
-              <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-ink-900">
-                <Image
-                  src="/logo.png"
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="h-6 w-auto object-contain"
-                />
-              </span>
-              <span className="leading-tight">
-                <span className="block text-sm font-semibold text-ink-900">
-                  {hotel?.name ?? 'The Meridian Grand'}
-                </span>
-                <span className="block text-xs text-ink-600">
-                  {hotel ? `${hotel.city} · ${hotel.contactNumber}` : 'Nariman Point, Mumbai'}
-                </span>
-              </span>
-            </div>
-          </div>
-
-          {/* Line-art skyline anchored to the bottom. Height follows the
-              drawing's own aspect so it never crops, whatever the panel's
-              height - the gradient fills any space above it. */}
-          <div className="relative mt-8 min-h-40 flex-1">
-            <SkylineIllustration className="absolute inset-x-0 bottom-0 h-auto w-full" />
-          </div>
+        <aside className="auth-property relative hidden flex-col justify-between overflow-hidden bg-cream-200 p-10 lg:flex">
+          <div className="relative z-10"><p className="text-xs tracking-[0.2em] text-brass-800 uppercase">An address to remember</p><h2 className="mt-8 max-w-xs font-serif text-5xl leading-[1.1] tracking-tight">Mumbai, at your own pace.</h2><p className="mt-5 max-w-xs text-sm leading-7 text-ink-600">Sea-view mornings. Unhurried evenings. A place to call your own on Marine Drive.</p></div>
+          <div className="relative mt-12 min-h-48 flex-1"><SkylineIllustration className="absolute inset-x-0 bottom-0 h-auto w-full" /></div>
+          <div className="relative z-10 mt-6 border-t border-cream-400 pt-6"><p className="font-serif text-xl">{hotel?.name ?? 'The Meridian Grand'}</p><p className="mt-2 text-xs text-ink-500">{hotel?.city ?? 'Marine Drive, Mumbai'} · A warm welcome awaits</p></div>
         </aside>
       </div>
     </div>
@@ -132,7 +65,7 @@ export function AuthField({ label, icon: Icon, error, hint, action, ...props }) 
           />
         )}
         <input
-          className={`w-full rounded-full border bg-white py-3 pr-4 text-sm text-ink-900 transition-colors placeholder:text-ink-400 focus:border-sky-400 ${
+          className={`w-full rounded-lg border bg-cream-50 py-3.5 pr-4 text-sm text-ink-900 transition-colors placeholder:text-ink-400 focus:border-brass-600 ${
             Icon ? 'pl-11' : 'pl-4'
           } ${error ? 'border-rose-400' : 'border-cream-400'}`}
           {...props}
@@ -166,7 +99,7 @@ export function AuthPasswordField({ label, icon: Icon, error, hint, action, ...p
         )}
         <input
           type={visible ? 'text' : 'password'}
-          className={`w-full rounded-full border bg-white py-3 pr-12 text-sm text-ink-900 transition-colors placeholder:text-ink-400 focus:border-sky-400 ${
+          className={`w-full rounded-lg border bg-cream-50 py-3.5 pr-12 text-sm text-ink-900 transition-colors placeholder:text-ink-400 focus:border-brass-600 ${
             Icon ? 'pl-11' : 'pl-4'
           } ${error ? 'border-rose-400' : 'border-cream-400'}`}
           {...props}
@@ -195,7 +128,7 @@ export function AuthSubmit({ children, loading, ...props }) {
     <button
       type="submit"
       disabled={loading}
-      className="w-full rounded-full bg-ink-900 py-3.5 text-sm font-semibold text-cream-100 transition-colors hover:bg-ink-800 disabled:cursor-not-allowed disabled:bg-ink-300"
+      className="w-full rounded-lg bg-ink-900 py-3.5 text-sm font-semibold text-cream-100 transition-colors hover:bg-ink-800 disabled:cursor-not-allowed disabled:bg-ink-300"
       {...props}
     >
       {loading ? 'Please wait…' : children}

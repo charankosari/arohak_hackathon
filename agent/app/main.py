@@ -80,17 +80,14 @@ class SearchRequest(BaseModel):
     k: int = Field(default=5, ge=1, le=20)
 
 
-def _with_context(message: str, history: list[Turn]) -> str:
-    """Give a terse follow-up ("and the pool?") the previous question's terms.
+def _previous_question(history: list[Turn]) -> str | None:
+    """The last thing the guest asked, used only as a fallback for a terse
+    follow-up that cannot be answered on its own ("and the spa?").
 
-    Without a language model there is no coreference resolution, so this is
-    deliberately narrow: only very short messages borrow context, and only from
-    the last thing the guest asked.
+    Without a language model there is no coreference resolution, so the agent
+    tries the message standalone first and reaches for this only if that fails.
     """
-    if len(message.split()) > 4:
-        return message
-    previous = next((t.content for t in reversed(history) if t.role == "user"), None)
-    return f"{previous} {message}" if previous else message
+    return next((t.content for t in reversed(history) if t.role == "user"), None)
 
 
 @app.get("/health")
@@ -116,9 +113,11 @@ async def health() -> dict:
 @app.post("/chat")
 async def chat(request: ChatRequest) -> dict:
     answerer: Answerer = state["answerer"]  # type: ignore[assignment]
-    question = _with_context(request.message.strip(), request.history)
-    result = await answerer.answer(question, today=request.today)
-    return {"question": request.message.strip(), **result.to_dict()}
+    message = request.message.strip()
+    result = await answerer.answer(
+        message, today=request.today, context=_previous_question(request.history)
+    )
+    return {"question": message, **result.to_dict()}
 
 
 @app.post("/search")

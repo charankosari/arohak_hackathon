@@ -1,6 +1,7 @@
 'use client';
 
-import { Menu, X } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowUpRight, CalendarCheck, XCircle, Menu, X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
@@ -9,7 +10,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { Spinner } from '@/components/ui';
 
 export default function DashboardLayout({ children }) {
-  const { user, loading } = useAuth();
+  const { user, loading, isCustomer } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -33,6 +34,23 @@ export default function DashboardLayout({ children }) {
         </div>
       </div>
     );
+  }
+
+  if (isCustomer) {
+    return <div className="guest-area min-h-dvh">
+      <Navbar />
+      <div className="mx-auto max-w-6xl px-5 pt-10 pb-16 sm:px-8 sm:pt-14">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <p className="text-xs font-semibold tracking-[0.22em] text-brass-800 uppercase">The Meridian Grand · Your stay</p>
+          <Link href="/rooms" className="flex items-center gap-2 text-sm text-ink-700">Explore rooms <ArrowUpRight className="size-4" /></Link>
+        </div>
+        <nav aria-label="Your stay" className="guest-tabs mb-10 flex gap-6 border-b border-cream-400 sm:gap-9">
+          {[{ href: '/dashboard/my-bookings', label: 'My bookings', icon: CalendarCheck }, { href: '/dashboard/cancellations', label: 'Cancellations', icon: XCircle }].map(({ href, label, icon: Icon }) => <Link key={href} href={href} aria-current={pathname === href ? 'page' : undefined} className="flex items-center gap-2 border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-ink-500"><Icon className="size-4" />{label}</Link>)}
+        </nav>
+        <main className="guest-content">{children}</main>
+        <footer className="mt-12 border-t border-cream-300 pt-6 text-xs text-ink-500">A little closer to your next Mumbai stay.</footer>
+      </div>
+    </div>;
   }
 
   return (

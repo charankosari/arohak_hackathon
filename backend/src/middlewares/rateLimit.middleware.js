@@ -125,6 +125,18 @@ export const bookingWriteLimiter = makeLimiter({
   keyGenerator: (req) => req.user?.id ?? ipKeyGenerator(req.ip),
 });
 
+/**
+ * Chat turns are public and each one fans out to the agent (and sometimes back
+ * into this API for availability), so they cost more than a plain read.
+ */
+export const chatLimiter = makeLimiter({
+  prefix: 'chat',
+  windowMs: 60 * 1000,
+  limit: 30,
+  message: 'Too many messages. Please wait a moment before asking again.',
+  keyGenerator: (req) => req.user?.id ?? ipKeyGenerator(req.ip),
+});
+
 /** Availability search is cheap but cacheable and easily abused by scrapers. */
 export const searchLimiter = makeLimiter({
   prefix: 'search',
