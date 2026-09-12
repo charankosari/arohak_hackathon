@@ -30,7 +30,9 @@ import { useEffect, useId, useRef } from 'react';
  */
 const FRAMES = {
   full: '0 0 140 168',
-  bust: '26 -2 108 122',
+  // Padded so the shoulders do not press against a circular avatar's border,
+  // and so the thinking dots (y ≈ 5) stay inside the frame.
+  bust: '20 -8 120 136',
 };
 
 export function ConciergeCharacter({ state = 'idle', frame = 'full', className = '', title }) {
