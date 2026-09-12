@@ -1,5 +1,6 @@
 import { Inter, Cormorant_Garamond } from 'next/font/google';
 import { AuthProvider } from '@/components/AuthProvider';
+import { ChatWidget } from '@/components/ChatWidget';
 import './globals.css';
 
 const sans = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
@@ -20,7 +21,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <body className="font-sans antialiased">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          {/* The RAG concierge, floating over every page but the auth screens. */}
+          <ChatWidget />
+        </AuthProvider>
       </body>
     </html>
   );

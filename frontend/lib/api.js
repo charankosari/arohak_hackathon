@@ -176,5 +176,20 @@ export const api = {
       request(`/api/${owner}/${id}/images/${imageId}`, { method: 'DELETE' }),
   },
 
+  /**
+   * The RAG concierge (see agent/). Public: a guest asks before signing in.
+   * `history` lets the agent resolve a terse follow-up like "and the spa?".
+   */
+  chat: {
+    ask: (message, history = [], signal) =>
+      request('/api/chat', {
+        method: 'POST',
+        body: { message, history },
+        auth: !!getToken(),
+        signal,
+      }),
+    health: () => request('/api/chat/health', { auth: false }),
+  },
+
   health: () => request('/health', { auth: false }),
 };
