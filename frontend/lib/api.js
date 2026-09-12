@@ -38,18 +38,22 @@ export class ApiError extends Error {
   }
 }
 
-async function request(path, { method = 'GET', body, auth = true, signal } = {}) {
+async function request(path, { method = 'GET', body, auth = true, signal, form } = {}) {
   const token = auth ? getToken() : null;
+
+  // For multipart the browser must set Content-Type itself, so it can add the
+  // boundary - setting it by hand produces an unparseable request.
+  const requestBody = form ?? (body ? JSON.stringify(body) : undefined);
 
   let response;
   try {
     response = await fetch(`${BASE}${path}`, {
       method,
       headers: {
-        ...(body ? { 'Content-Type': 'application/json' } : {}),
+        ...(body && !form ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      ...(body ? { body: JSON.stringify(body) } : {}),
+      ...(requestBody !== undefined ? { body: requestBody } : {}),
       signal,
     });
   } catch (error) {
@@ -146,6 +150,30 @@ export const api = {
     update: (id, body) => request(`/api/users/${id}`, { method: 'PATCH', body }),
     deactivate: (id) => request(`/api/users/${id}`, { method: 'DELETE' }),
     dashboard: () => request('/api/users/dashboard'),
+  },
+
+  /**
+   * Galleries. The same endpoints hang off both /hotels/:id and /rooms/:id,
+   * so one helper serves both - `owner` is 'hotels' or 'rooms'.
+   */
+  images: {
+    list: (owner, id) => request(`/api/${owner}/${id}/images`, { auth: false }),
+
+    upload: (owner, id, files, alt) => {
+      const form = new FormData();
+      for (const file of files) form.append('images', file);
+      if (alt) form.append('alt', alt);
+      return request(`/api/${owner}/${id}/images`, { method: 'POST', form });
+    },
+
+    update: (owner, id, imageId, body) =>
+      request(`/api/${owner}/${id}/images/${imageId}`, { method: 'PATCH', body }),
+
+    reorder: (owner, id, orderedIds) =>
+      request(`/api/${owner}/${id}/images/order`, { method: 'PATCH', body: { orderedIds } }),
+
+    remove: (owner, id, imageId) =>
+      request(`/api/${owner}/${id}/images/${imageId}`, { method: 'DELETE' }),
   },
 
   health: () => request('/health', { auth: false }),

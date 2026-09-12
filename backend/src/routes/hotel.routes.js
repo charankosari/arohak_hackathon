@@ -8,8 +8,12 @@ import {
 import { validateBody, validateParams, validateQuery } from '../middlewares/validate.middleware.js';
 import { idParam } from '../validators/common.validator.js';
 import { createHotelSchema, listHotelsSchema, updateHotelSchema } from '../validators/hotel.validator.js';
+import imageRoutes from './image.routes.js';
 
 const router = Router();
+
+// Photo gallery for a property.
+router.use('/:id/images', imageRoutes);
 
 // Browsing is open to guests (signed in or not); optionalAuthenticate lets the
 // service widen results to INACTIVE hotels when a staff member is looking.

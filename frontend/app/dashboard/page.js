@@ -56,13 +56,21 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-xs tracking-wider text-ink-400 uppercase">
+      <header className="rounded-3xl bg-sky-200 px-6 py-7 sm:px-8">
+        <p className="text-xs tracking-[0.2em] text-ink-600 uppercase">
           {ROLE_LABELS[user.role]} dashboard
         </p>
-        <h1 className="mt-1 font-serif text-3xl font-bold text-ink-900">
+        <h1 className="mt-2 font-serif text-3xl font-bold text-ink-900 sm:text-4xl">
           Welcome back, {user.name.split(' ')[0]}
         </h1>
+        <p className="mt-1.5 text-sm text-ink-700">
+          {new Intl.DateTimeFormat('en-IN', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            timeZone: 'Asia/Kolkata',
+          }).format(new Date())}
+        </p>
       </header>
 
       {error && (

@@ -12,12 +12,13 @@ const cx = (...classes) => classes.filter(Boolean).join(' ');
 // ---------------------------------------------------------------------------
 
 const BUTTON_VARIANTS = {
-  primary: 'bg-ink-900 text-white hover:bg-ink-800 disabled:bg-ink-300',
-  brass: 'bg-brass-500 text-ink-950 hover:bg-brass-400 disabled:bg-brass-200',
-  outline: 'border border-ink-300 bg-white text-ink-800 hover:bg-ink-50 disabled:text-ink-400',
-  ghost: 'text-ink-600 hover:bg-ink-100 hover:text-ink-900',
+  primary: 'bg-ink-900 text-cream-100 hover:bg-ink-800 disabled:bg-ink-300',
+  // The headline action: periwinkle with navy type, as on the landing page.
+  brass: 'bg-sky-300 text-ink-900 hover:bg-sky-400 disabled:bg-sky-100 disabled:text-ink-400',
+  outline: 'border border-cream-400 bg-white text-ink-800 hover:bg-cream-100 disabled:text-ink-400',
+  ghost: 'text-ink-600 hover:bg-sky-100 hover:text-ink-900',
   danger: 'bg-rose-600 text-white hover:bg-rose-500 disabled:bg-rose-300',
-  quiet: 'border border-ink-200 bg-ink-50 text-ink-700 hover:bg-ink-100',
+  quiet: 'border border-cream-300 bg-cream-100 text-ink-700 hover:bg-cream-200',
 };
 
 const BUTTON_SIZES = {
@@ -41,7 +42,7 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       className={cx(
-        'inline-flex items-center justify-center rounded-lg font-medium transition-colors',
+        'inline-flex items-center justify-center rounded-full font-medium transition-colors',
         'disabled:cursor-not-allowed',
         BUTTON_VARIANTS[variant],
         BUTTON_SIZES[size],
@@ -60,8 +61,8 @@ export function Button({
 // ---------------------------------------------------------------------------
 
 const FIELD_BASE =
-  'w-full rounded-lg border bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 ' +
-  'disabled:bg-ink-50 disabled:text-ink-400';
+  'w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-ink-400 ' +
+  'transition-colors focus:border-sky-400 disabled:bg-cream-100 disabled:text-ink-400';
 
 export function Field({ label, error, hint, required, children, className }) {
   return (
@@ -85,7 +86,7 @@ export function Field({ label, error, hint, required, children, className }) {
 export function Input({ error, className, ...props }) {
   return (
     <input
-      className={cx(FIELD_BASE, error ? 'border-rose-400' : 'border-ink-200', className)}
+      className={cx(FIELD_BASE, error ? 'border-rose-400' : 'border-cream-400', className)}
       {...props}
     />
   );
@@ -98,7 +99,7 @@ export function Textarea({ error, className, ...props }) {
       className={cx(
         FIELD_BASE,
         'resize-y',
-        error ? 'border-rose-400' : 'border-ink-200',
+        error ? 'border-rose-400' : 'border-cream-400',
         className
       )}
       {...props}
@@ -109,7 +110,7 @@ export function Textarea({ error, className, ...props }) {
 export function Select({ error, className, children, ...props }) {
   return (
     <select
-      className={cx(FIELD_BASE, error ? 'border-rose-400' : 'border-ink-200', className)}
+      className={cx(FIELD_BASE, error ? 'border-rose-400' : 'border-cream-400', className)}
       {...props}
     >
       {children}
@@ -124,7 +125,7 @@ export function Select({ error, className, children, ...props }) {
 export function Card({ children, className, as: Tag = 'div', ...props }) {
   return (
     <Tag
-      className={cx('rounded-xl border border-ink-200 bg-white shadow-sm', className)}
+      className={cx('rounded-2xl border border-cream-300 bg-white shadow-sm', className)}
       {...props}
     >
       {children}
@@ -136,7 +137,7 @@ export function CardHeader({ title, subtitle, action, className }) {
   return (
     <div
       className={cx(
-        'flex flex-wrap items-start justify-between gap-3 border-b border-ink-100 px-5 py-4',
+        'flex flex-wrap items-start justify-between gap-3 border-b border-cream-200 px-5 py-4',
         className
       )}
     >
@@ -193,7 +194,7 @@ export function LoadingBlock({ label = 'Loading', rows = 3 }) {
   return (
     <div className="space-y-3 p-5" aria-busy="true" aria-label={label}>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="h-12 animate-pulse rounded-lg bg-ink-100" />
+        <div key={i} className="h-12 animate-pulse rounded-xl bg-cream-200" />
       ))}
     </div>
   );
@@ -203,7 +204,7 @@ export function EmptyState({ icon: Icon, title, children, action }) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
       {Icon && (
-        <div className="mb-3 grid size-11 place-items-center rounded-full bg-ink-100">
+        <div className="mb-3 grid size-12 place-items-center rounded-full bg-sky-100">
           <Icon className="size-5 text-ink-400" aria-hidden />
         </div>
       )}
@@ -261,11 +262,11 @@ export function Modal({ open, onClose, title, description, children, footer, siz
         aria-modal="true"
         aria-label={title}
         className={cx(
-          'animate-fade-up relative w-full overflow-hidden rounded-xl bg-white shadow-xl',
+          'animate-fade-up relative w-full overflow-hidden rounded-2xl bg-white shadow-2xl',
           sizes[size]
         )}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-ink-100 px-5 py-4">
+        <div className="flex items-start justify-between gap-4 border-b border-cream-200 px-5 py-4">
           <div>
             <h2 className="text-base font-semibold text-ink-900">{title}</h2>
             {description && <p className="mt-0.5 text-sm text-ink-500">{description}</p>}
@@ -281,7 +282,7 @@ export function Modal({ open, onClose, title, description, children, footer, siz
         </div>
         <div className="max-h-[65vh] overflow-y-auto px-5 py-4">{children}</div>
         {footer && (
-          <div className="flex justify-end gap-2 border-t border-ink-100 bg-ink-50 px-5 py-3">
+          <div className="flex justify-end gap-2 border-t border-cream-200 bg-cream-100 px-5 py-3">
             {footer}
           </div>
         )}
@@ -307,7 +308,7 @@ export function Th({ children, className }) {
   return (
     <th
       className={cx(
-        'whitespace-nowrap border-b border-ink-200 bg-ink-50 px-4 py-2.5',
+        'whitespace-nowrap border-b border-cream-300 bg-cream-100 px-4 py-2.5',
         'text-xs font-semibold tracking-wide text-ink-500 uppercase',
         className
       )}
@@ -319,26 +320,26 @@ export function Th({ children, className }) {
 
 export function Td({ children, className }) {
   return (
-    <td className={cx('border-b border-ink-100 px-4 py-3 align-middle', className)}>{children}</td>
+    <td className={cx('border-b border-cream-200 px-4 py-3 align-middle', className)}>{children}</td>
   );
 }
 
 export function StatTile({ label, value, hint, icon: Icon, tone = 'ink' }) {
   const tones = {
-    ink: 'bg-ink-900 text-white',
-    brass: 'bg-brass-500 text-ink-950',
-    light: 'bg-ink-100 text-ink-700',
+    ink: 'bg-ink-900 text-sky-300',
+    brass: 'bg-sky-300 text-ink-900',
+    light: 'bg-sky-100 text-ink-700',
   };
   return (
-    <Card className="p-5">
+    <Card className="p-5 transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-medium tracking-wide text-ink-500 uppercase">{label}</p>
-          <p className="mt-1.5 text-2xl font-semibold text-ink-900">{value}</p>
+          <p className="mt-1.5 font-serif text-3xl font-bold text-ink-900">{value}</p>
           {hint && <p className="mt-1 truncate text-xs text-ink-400">{hint}</p>}
         </div>
         {Icon && (
-          <div className={cx('grid size-9 shrink-0 place-items-center rounded-lg', tones[tone])}>
+          <div className={cx('grid size-10 shrink-0 place-items-center rounded-full', tones[tone])}>
             <Icon className="size-4" aria-hidden />
           </div>
         )}

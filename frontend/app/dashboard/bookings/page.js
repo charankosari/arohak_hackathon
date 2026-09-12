@@ -167,7 +167,7 @@ export default function StaffBookingsPage() {
               {data.bookings.map((booking) => {
                 const pending = booking.cancellationRequests?.some((r) => r.status === 'PENDING');
                 return (
-                  <tr key={booking.id} className="hover:bg-ink-50">
+                  <tr key={booking.id} className="hover:bg-cream-100">
                     <Td>
                       <span className="font-mono text-xs text-ink-700">{booking.reference}</span>
                       {pending && (

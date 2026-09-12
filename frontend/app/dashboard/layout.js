@@ -26,7 +26,7 @@ export default function DashboardLayout({ children }) {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-ink-50">
+      <div className="min-h-screen bg-cream-100">
         <Navbar />
         <div className="grid place-items-center py-32">
           <Spinner />
@@ -36,12 +36,12 @@ export default function DashboardLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-ink-50">
+    <div className="min-h-screen bg-cream-100">
       <Navbar />
 
       <div className="mx-auto flex max-w-7xl">
         {/* Desktop sidebar */}
-        <aside className="sticky top-[65px] hidden h-[calc(100vh-65px)] w-60 shrink-0 border-r border-ink-200 bg-white lg:block">
+        <aside className="sticky top-[65px] hidden h-[calc(100vh-65px)] w-64 shrink-0 border-r border-cream-300 bg-cream-50 lg:block">
           <Sidebar />
         </aside>
 
@@ -55,7 +55,7 @@ export default function DashboardLayout({ children }) {
               onClick={() => setDrawerOpen(false)}
             />
             <aside className="animate-fade-up absolute top-0 left-0 h-full w-64 bg-white shadow-xl">
-              <div className="flex items-center justify-between border-b border-ink-200 px-4 py-3">
+              <div className="flex items-center justify-between border-b border-cream-300 px-4 py-3">
                 <span className="text-sm font-semibold text-ink-900">Menu</span>
                 <button
                   type="button"
@@ -75,7 +75,7 @@ export default function DashboardLayout({ children }) {
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
-            className="m-4 inline-flex items-center gap-2 rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-700 lg:hidden"
+            className="m-4 inline-flex items-center gap-2 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm text-ink-700 lg:hidden"
           >
             <Menu className="size-4" />
             Menu

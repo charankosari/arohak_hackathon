@@ -35,7 +35,7 @@ export async function searchAvailableRooms({
       ...(maxPrice ? { pricePerNight: { lte: maxPrice } } : {}),
       ...(blockedRoomIds.length ? { id: { notIn: blockedRoomIds } } : {}),
     },
-    include: { hotel: true },
+    include: { hotel: true, images: { orderBy: { position: 'asc' } } },
     orderBy: [{ pricePerNight: 'asc' }, { roomNumber: 'asc' }],
   });
 

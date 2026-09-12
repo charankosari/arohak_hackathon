@@ -25,6 +25,12 @@ export const env = {
   // Optional: when unset the API runs without caching and rate-limits in-memory.
   redisUrl: optional('REDIS_URL', ''),
 
+  // Optional: without these, image upload is disabled and the UI shows its
+  // designed placeholders instead.
+  cloudinaryCloudName: optional('CLOUDINARY_CLOUD_NAME', ''),
+  cloudinaryApiKey: optional('CLOUDINARY_API_KEY', ''),
+  cloudinaryApiSecret: optional('CLOUDINARY_API_SECRET', ''),
+
   jwtSecret: required('JWT_SECRET'),
   jwtExpiresIn: optional('JWT_EXPIRES_IN', '12h'),
 

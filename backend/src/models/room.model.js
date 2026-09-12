@@ -1,16 +1,21 @@
 import { prisma } from '../lib/prisma.js';
 
 export const roomModel = {
-  findById: (id) => prisma.room.findUnique({ where: { id } }),
+  findById: (id) => prisma.room.findUnique({ where: { id }, include: { images: { orderBy: { position: 'asc' } } } }),
 
-  findByIdWithHotel: (id) => prisma.room.findUnique({ where: { id }, include: { hotel: true } }),
+  findByIdWithHotel: (id) =>
+    prisma.room.findUnique({
+      where: { id },
+      include: { hotel: { include: { images: { orderBy: { position: 'asc' } } } }, images: { orderBy: { position: 'asc' } } },
+    }),
 
   findByNumber: (hotelId, roomNumber) =>
     prisma.room.findUnique({ where: { hotelId_roomNumber: { hotelId, roomNumber } } }),
 
-  create: (data) => prisma.room.create({ data, include: { hotel: true } }),
+  create: (data) => prisma.room.create({ data, include: { hotel: true, images: { orderBy: { position: 'asc' } } } }),
 
-  update: (id, data) => prisma.room.update({ where: { id }, data, include: { hotel: true } }),
+  update: (id, data) =>
+    prisma.room.update({ where: { id }, data, include: { hotel: true, images: { orderBy: { position: 'asc' } } } }),
 
   delete: (id) => prisma.room.delete({ where: { id } }),
 
@@ -33,7 +38,7 @@ export const roomModel = {
     return prisma.$transaction([
       prisma.room.findMany({
         where,
-        include: { hotel: true },
+        include: { hotel: true, images: { orderBy: { position: 'asc' } } },
         orderBy: [{ pricePerNight: 'asc' }, { roomNumber: 'asc' }],
         skip,
         take,

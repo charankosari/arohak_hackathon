@@ -1,19 +1,27 @@
 import { prisma } from '../lib/prisma.js';
 
 export const hotelModel = {
-  findById: (id) => prisma.hotel.findUnique({ where: { id } }),
+  findById: (id) => prisma.hotel.findUnique({ where: { id }, include: { images: { orderBy: { position: 'asc' } } } }),
 
   findByIdWithRooms: (id) =>
-    prisma.hotel.findUnique({ where: { id }, include: { rooms: { orderBy: { roomNumber: 'asc' } } } }),
+    prisma.hotel.findUnique({
+      where: { id },
+      include: {
+        rooms: { orderBy: { roomNumber: 'asc' }, include: { images: { orderBy: { position: 'asc' } } } },
+        images: { orderBy: { position: 'asc' } },
+      },
+    }),
 
   findByCode: (code) => prisma.hotel.findUnique({ where: { code: code.toUpperCase() } }),
 
-  create: (data) => prisma.hotel.create({ data: { ...data, code: data.code.toUpperCase() } }),
+  create: (data) =>
+    prisma.hotel.create({ data: { ...data, code: data.code.toUpperCase() }, include: { images: { orderBy: { position: 'asc' } } } }),
 
   update: (id, data) =>
     prisma.hotel.update({
       where: { id },
       data: data.code ? { ...data, code: data.code.toUpperCase() } : data,
+      include: { images: { orderBy: { position: 'asc' } } },
     }),
 
   delete: (id) => prisma.hotel.delete({ where: { id } }),
@@ -35,7 +43,7 @@ export const hotelModel = {
     return prisma.$transaction([
       prisma.hotel.findMany({
         where,
-        include: { _count: { select: { rooms: true } } },
+        include: { _count: { select: { rooms: true } }, images: { orderBy: { position: 'asc' } } },
         orderBy: { name: 'asc' },
         skip,
         take,

@@ -72,7 +72,7 @@ export default function CancellationsPage() {
               className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
                 status === option.key
                   ? 'bg-ink-900 font-medium text-white'
-                  : 'border border-ink-200 bg-white text-ink-600 hover:bg-ink-50'
+                  : 'border border-ink-200 bg-white text-ink-600 hover:bg-cream-100'
               }`}
             >
               {option.label}

@@ -4,7 +4,7 @@ import { prisma } from '../lib/prisma.js';
 export const BLOCKING_STATUSES = ['CONFIRMED', 'CHECKED_IN'];
 
 const fullInclude = {
-  room: { include: { hotel: true } },
+  room: { include: { hotel: true, images: { orderBy: { position: 'asc' } } } },
   hotel: true,
   guest: true,
   cancellationRequests: {

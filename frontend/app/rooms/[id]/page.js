@@ -1,11 +1,12 @@
 'use client';
 
-import { ArrowLeft, BedDouble, Check, CheckCircle2, Users } from 'lucide-react';
+import { ArrowLeft, Check, CheckCircle2, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { Navbar } from '@/components/Navbar';
+import { RoomGallery } from '@/components/RoomGallery';
 import { Alert, Badge, Button, Card, Field, Input, Select, Spinner, Textarea } from '@/components/ui';
 import { api } from '@/lib/api';
 import { addDaysISO, formatDate, money, nightsBetween, todayISO } from '@/lib/format';
@@ -117,7 +118,7 @@ function RoomDetail() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-ink-50">
+      <div className="min-h-screen bg-cream-100">
         <Navbar />
         <div className="mx-auto max-w-2xl px-4 py-16">
           <Alert tone="error" title="Room not found">
@@ -133,7 +134,7 @@ function RoomDetail() {
 
   if (!room) {
     return (
-      <div className="grid min-h-screen place-items-center bg-ink-50">
+      <div className="grid min-h-screen place-items-center bg-cream-100">
         <Spinner />
       </div>
     );
@@ -142,7 +143,7 @@ function RoomDetail() {
   // --- Booking confirmed -------------------------------------------------
   if (confirmation) {
     return (
-      <div className="min-h-screen bg-ink-50">
+      <div className="min-h-screen bg-cream-100">
         <Navbar />
         <div className="mx-auto max-w-xl px-4 py-16 sm:px-6">
           <Card className="animate-fade-up overflow-hidden">
@@ -199,7 +200,7 @@ function RoomDetail() {
 
   // --- Booking form ------------------------------------------------------
   return (
-    <div className="min-h-screen bg-ink-50">
+    <div className="min-h-screen bg-cream-100">
       <Navbar />
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -215,12 +216,7 @@ function RoomDetail() {
           {/* Room details */}
           <div>
             <Card className="overflow-hidden">
-              <div className="relative flex h-48 items-center justify-center bg-ink-900">
-                <BedDouble className="size-14 text-brass-400" aria-hidden />
-                <span className="absolute top-4 left-4 rounded-md bg-ink-950/70 px-2.5 py-1 text-xs font-medium text-brass-200">
-                  Room {room.roomNumber}
-                </span>
-              </div>
+              <RoomGallery room={room} />
 
               <div className="p-6">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -437,7 +433,7 @@ export default function RoomPage() {
   return (
     <Suspense
       fallback={
-        <div className="grid min-h-screen place-items-center bg-ink-50">
+        <div className="grid min-h-screen place-items-center bg-cream-100">
           <Spinner />
         </div>
       }

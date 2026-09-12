@@ -1,12 +1,13 @@
 'use client';
 
-import { Info } from 'lucide-react';
+import { ArrowRight, Info } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { Navbar } from '@/components/Navbar';
-import { Alert, Button, Card, Field, Input } from '@/components/ui';
+import { ScrollReveal } from '@/components/ScrollReveal';
+import { Alert, Field, Input } from '@/components/ui';
 
 export default function RegisterPage() {
   const { register, user, loading } = useAuth();
@@ -46,15 +47,22 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-ink-50">
+    <div className="min-h-screen bg-cream-100">
       <Navbar />
       <div className="mx-auto max-w-md px-4 py-12 sm:px-6 lg:py-20">
-        <h1 className="font-serif text-3xl font-bold text-ink-900">Create your account</h1>
-        <p className="mt-2 text-sm text-ink-500">
-          Book stays, view your reservations and manage cancellations.
-        </p>
+        <ScrollReveal>
+          <span className="marker-honey inline-block -rotate-1 font-serif text-sm text-ink-800">
+            Join us
+          </span>
+          <h1 className="mt-5 font-serif text-4xl font-bold text-ink-900 sm:text-5xl">
+            Create your account
+          </h1>
+          <p className="mt-3 text-ink-500">
+            Book stays, view your reservations and manage cancellations.
+          </p>
+        </ScrollReveal>
 
-        <Card className="mt-6 p-6">
+        <div className="mt-8">
           <form onSubmit={onSubmit} className="space-y-4">
             {error && <Alert tone="error">{error}</Alert>}
 
@@ -64,6 +72,7 @@ export default function RegisterPage() {
                 onChange={set('name')}
                 autoComplete="name"
                 placeholder="Rahul Verma"
+                className="!rounded-full !bg-white !px-5 !py-3"
                 error={fieldErrors.name}
                 required
               />
@@ -76,6 +85,7 @@ export default function RegisterPage() {
                 onChange={set('email')}
                 autoComplete="email"
                 placeholder="you@example.com"
+                className="!rounded-full !bg-white !px-5 !py-3"
                 error={fieldErrors.email}
                 required
               />
@@ -92,6 +102,7 @@ export default function RegisterPage() {
                 onChange={set('phone')}
                 autoComplete="tel"
                 placeholder="+91 98200 10000"
+                className="!rounded-full !bg-white !px-5 !py-3"
                 error={fieldErrors.phone}
               />
             </Field>
@@ -107,18 +118,26 @@ export default function RegisterPage() {
                 value={form.password}
                 onChange={set('password')}
                 autoComplete="new-password"
+                className="!rounded-full !bg-white !px-5 !py-3"
                 error={fieldErrors.password}
                 minLength={8}
                 required
               />
             </Field>
 
-            <Button type="submit" size="lg" loading={submitting} className="w-full">
-              Create account
-            </Button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-ink-900 py-2.5 pr-2.5 pl-6 font-medium text-cream-100 transition-colors hover:bg-ink-800 disabled:cursor-not-allowed disabled:bg-ink-300"
+            >
+              {submitting ? 'Creating account…' : 'Create account'}
+              <span className="grid size-9 place-items-center rounded-full bg-cream-100 text-ink-900 transition-transform group-hover:translate-x-0.5">
+                <ArrowRight className="size-4" aria-hidden />
+              </span>
+            </button>
           </form>
 
-          <div className="mt-5 flex gap-2.5 rounded-lg bg-ink-50 p-3 text-xs text-ink-500">
+          <div className="mt-6 flex gap-2.5 rounded-2xl bg-sky-100 p-4 text-xs text-ink-600">
             <Info className="mt-0.5 size-4 shrink-0 text-ink-400" aria-hidden />
             <p>
               Accounts created here are guest accounts. Receptionist and administrator
@@ -126,13 +145,16 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          <p className="mt-4 text-center text-sm text-ink-500">
+          <p className="mt-6 text-sm text-ink-500">
             Already registered?{' '}
-            <Link href="/login" className="font-medium text-brass-600 hover:text-brass-700">
+            <Link
+              href="/login"
+              className="font-medium text-ink-900 underline underline-offset-4 hover:text-ink-700"
+            >
               Sign in
             </Link>
           </p>
-        </Card>
+        </div>
       </div>
     </div>
   );

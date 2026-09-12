@@ -2,22 +2,20 @@
 
 import { CalendarDays, Search, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { Button, Field, Input, Select } from '@/components/ui';
+import { useId, useState } from 'react';
 import { addDaysISO, nightsBetween, todayISO } from '@/lib/format';
 
 /**
- * Date + party-size picker. Submits to /rooms as query params so a search is
- * shareable and survives a reload.
+ * Date + party-size picker, styled as one continuous pill with hairline
+ * dividers rather than separate boxed inputs.
+ *
+ * Submits to /rooms as query params, so a search is shareable and survives a
+ * reload.
  */
-export function AvailabilitySearch({
-  initial = {},
-  variant = 'hero',
-  roomTypes = [],
-  onSearch,
-}) {
+export function AvailabilitySearch({ initial = {}, variant = 'hero', roomTypes = [], onSearch }) {
   const router = useRouter();
   const today = todayISO();
+  const uid = useId();
 
   const [checkIn, setCheckIn] = useState(initial.checkIn || addDaysISO(today, 1));
   const [checkOut, setCheckOut] = useState(initial.checkOut || addDaysISO(today, 3));
@@ -44,87 +42,118 @@ export function AvailabilitySearch({
     else router.push(`/rooms?${new URLSearchParams(params).toString()}`);
   }
 
-  const hero = variant === 'hero';
+  const showTypes = variant !== 'hero' && roomTypes.length > 0;
 
   return (
     <form
       onSubmit={submit}
-      className={
-        hero
-          ? 'grid gap-3 rounded-xl border border-ink-200 bg-white p-4 shadow-lg sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto_auto]'
-          : 'grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto_1fr_auto]'
-      }
+      className="flex flex-col gap-2 rounded-[1.75rem] bg-white p-2 shadow-sm ring-1 ring-cream-300 md:flex-row md:items-stretch md:rounded-full md:gap-0"
     >
-      <Field label="Check-in" required>
-        <div className="relative">
-          <CalendarDays className="pointer-events-none absolute top-2.5 left-3 size-4 text-ink-400" />
-          <Input
-            type="date"
-            value={checkIn}
-            min={today}
-            onChange={(e) => handleCheckIn(e.target.value)}
-            className="pl-9"
-            required
-          />
-        </div>
-      </Field>
-
-      <Field
-        label="Check-out"
-        required
-        error={invalid ? 'Must be after check-in' : undefined}
-        hint={!invalid ? `${nights} night${nights === 1 ? '' : 's'}` : undefined}
+      {/* Check-in */}
+      <Segment
+        icon={CalendarDays}
+        label="Check-in"
+        htmlFor={`${uid}-in`}
+        className="md:flex-1"
       >
-        <div className="relative">
-          <CalendarDays className="pointer-events-none absolute top-2.5 left-3 size-4 text-ink-400" />
-          <Input
-            type="date"
-            value={checkOut}
-            min={addDaysISO(checkIn, 1)}
-            onChange={(e) => setCheckOut(e.target.value)}
-            className="pl-9"
-            error={invalid}
-            required
-          />
-        </div>
-      </Field>
+        <input
+          id={`${uid}-in`}
+          type="date"
+          value={checkIn}
+          min={today}
+          onChange={(e) => handleCheckIn(e.target.value)}
+          className="w-full bg-transparent text-sm font-medium text-ink-900 outline-none"
+          required
+        />
+      </Segment>
 
-      <Field label="Guests" required className="sm:max-w-28">
-        <div className="relative">
-          <Users className="pointer-events-none absolute top-2.5 left-3 size-4 text-ink-400" />
-          <Select
-            value={guests}
-            onChange={(e) => setGuests(Number(e.target.value))}
-            className="pl-9"
-          >
-            {[1, 2, 3, 4].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </Select>
-        </div>
-      </Field>
+      <Divider />
 
-      {!hero && roomTypes.length > 0 && (
-        <Field label="Room type">
-          <Select value={roomType} onChange={(e) => setRoomType(e.target.value)}>
-            <option value="">Any room type</option>
-            {roomTypes.map((t) => (
-              <option key={t.roomType} value={t.roomType}>
-                {t.roomType}
-              </option>
-            ))}
-          </Select>
-        </Field>
+      {/* Check-out */}
+      <Segment
+        icon={CalendarDays}
+        label={invalid ? 'Check-out — must be later' : `Check-out · ${nights} night${nights === 1 ? '' : 's'}`}
+        htmlFor={`${uid}-out`}
+        className="md:flex-1"
+        error={invalid}
+      >
+        <input
+          id={`${uid}-out`}
+          type="date"
+          value={checkOut}
+          min={addDaysISO(checkIn, 1)}
+          onChange={(e) => setCheckOut(e.target.value)}
+          className="w-full bg-transparent text-sm font-medium text-ink-900 outline-none"
+          required
+        />
+      </Segment>
+
+      <Divider />
+
+      {/* Guests */}
+      <Segment icon={Users} label="Guests" htmlFor={`${uid}-guests`} className="md:w-40">
+        <select
+          id={`${uid}-guests`}
+          value={guests}
+          onChange={(e) => setGuests(Number(e.target.value))}
+          className="w-full cursor-pointer bg-transparent text-sm font-medium text-ink-900 outline-none"
+        >
+          {[1, 2, 3, 4].map((n) => (
+            <option key={n} value={n}>
+              {n} {n === 1 ? 'guest' : 'guests'}
+            </option>
+          ))}
+        </select>
+      </Segment>
+
+      {showTypes && (
+        <>
+          <Divider />
+          <Segment label="Room type" htmlFor={`${uid}-type`} className="md:w-48">
+            <select
+              id={`${uid}-type`}
+              value={roomType}
+              onChange={(e) => setRoomType(e.target.value)}
+              className="w-full cursor-pointer bg-transparent text-sm font-medium text-ink-900 outline-none"
+            >
+              <option value="">Any type</option>
+              {roomTypes.map((t) => (
+                <option key={t.roomType} value={t.roomType}>
+                  {t.roomType}
+                </option>
+              ))}
+            </select>
+          </Segment>
+        </>
       )}
 
-      <div className="flex items-end">
-        <Button type="submit" variant="brass" size="lg" disabled={invalid} className="w-full">
-          <Search className="size-4" />
-          Search
-        </Button>
-      </div>
+      <button
+        type="submit"
+        disabled={invalid}
+        className="inline-flex items-center justify-center gap-2 rounded-full bg-ink-900 px-7 py-3.5 text-sm font-medium text-cream-100 transition-colors hover:bg-ink-800 disabled:cursor-not-allowed disabled:bg-ink-300 md:ml-2"
+      >
+        <Search className="size-4" aria-hidden />
+        Search
+      </button>
     </form>
   );
 }
+
+function Segment({ icon: Icon, label, htmlFor, children, className = '', error }) {
+  return (
+    <div className={`min-w-0 rounded-2xl px-4 py-2.5 transition-colors hover:bg-cream-100 md:rounded-full ${className}`}>
+      <label
+        htmlFor={htmlFor}
+        className={`flex items-center gap-1.5 text-[11px] font-medium tracking-wide uppercase ${
+          error ? 'text-rose-600' : 'text-ink-400'
+        }`}
+      >
+        {Icon && <Icon className="size-3" aria-hidden />}
+        {label}
+      </label>
+      <div className="mt-0.5">{children}</div>
+    </div>
+  );
+}
+
+const Divider = () => <span aria-hidden className="hidden w-px self-center bg-cream-300 md:block md:h-9" />;

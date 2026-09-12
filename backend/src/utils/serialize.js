@@ -3,6 +3,19 @@ import { formatDateOnly } from './dates.js';
 /** Prisma returns Decimal objects; the API speaks plain JSON numbers. */
 const money = (value) => (value == null ? null : Number(value));
 
+export function serializeImage(image) {
+  if (!image) return null;
+  return {
+    id: image.id,
+    url: image.url,
+    publicId: image.publicId,
+    width: image.width ?? null,
+    height: image.height ?? null,
+    alt: image.alt ?? null,
+    position: image.position,
+  };
+}
+
 export function serializeUser(user) {
   if (!user) return null;
   return {
@@ -30,6 +43,9 @@ export function serializeHotel(hotel) {
     status: hotel.status,
     createdAt: hotel.createdAt,
     updatedAt: hotel.updatedAt,
+    images: (hotel.images ?? []).map(serializeImage),
+    // Cover = first by position, so the UI never has to sort.
+    coverImage: hotel.images?.length ? serializeImage(hotel.images[0]) : null,
     ...(hotel._count?.rooms !== undefined ? { roomCount: hotel._count.rooms } : {}),
     ...(hotel.rooms ? { rooms: hotel.rooms.map(serializeRoom) } : {}),
   };
@@ -47,6 +63,8 @@ export function serializeRoom(room) {
     status: room.status,
     description: room.description ?? null,
     amenities: room.amenities ?? [],
+    images: (room.images ?? []).map(serializeImage),
+    coverImage: room.images?.length ? serializeImage(room.images[0]) : null,
     createdAt: room.createdAt,
     updatedAt: room.updatedAt,
     ...(room.hotel ? { hotel: serializeHotel(room.hotel) } : {}),

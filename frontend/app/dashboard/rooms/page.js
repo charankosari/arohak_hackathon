@@ -3,6 +3,7 @@
 import { BedDouble, CalendarDays, Info, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { ImageManager } from '@/components/ImageManager';
 import {
   Alert,
   Badge,
@@ -20,6 +21,7 @@ import {
   Textarea,
   Th,
 } from '@/components/ui';
+import { SmartImage } from '@/components/SmartImage';
 import { api } from '@/lib/api';
 import { ROOM_STATUSES } from '@/lib/constants';
 import { addDaysISO, formatDateShort, money, todayISO } from '@/lib/format';
@@ -177,6 +179,7 @@ export default function ManageRoomsPage() {
           <TableWrap>
             <thead>
               <tr>
+                <Th>Photo</Th>
                 <Th>Room</Th>
                 <Th>Type</Th>
                 <Th>Capacity</Th>
@@ -187,7 +190,16 @@ export default function ManageRoomsPage() {
             </thead>
             <tbody>
               {rooms.map((room) => (
-                <tr key={room.id} className="hover:bg-ink-50">
+                <tr key={room.id} className="hover:bg-cream-100">
+                  <Td>
+                    <div className="relative size-12 overflow-hidden rounded-md bg-ink-100 ring-1 ring-ink-200">
+                      <SmartImage
+                        image={room.coverImage}
+                        alt={`Room ${room.roomNumber}`}
+                        sizes="48px"
+                      />
+                    </div>
+                  </Td>
                   <Td className="font-medium text-ink-900">{room.roomNumber}</Td>
                   <Td>
                     <p className="text-ink-900">{room.roomType}</p>
@@ -493,6 +505,17 @@ function RoomDialog({ room, hotels, isAdmin, onClose, onDone }) {
             disabled={!isAdmin && !isNew}
           />
         </Field>
+
+        {isAdmin && (
+          <div className="border-t border-ink-100 pt-4">
+            <p className="mb-2 text-sm font-medium text-ink-700">Photographs</p>
+            <ImageManager
+              owner="rooms"
+              id={isNew ? null : room?.id}
+              label={isNew ? null : `Room ${room?.roomNumber}`}
+            />
+          </div>
+        )}
 
         {!isAdmin && !isNew && (
           <Alert tone="info" className="text-xs">

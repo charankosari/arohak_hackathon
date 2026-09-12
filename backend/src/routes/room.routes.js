@@ -7,6 +7,7 @@ import {
   requireStaff,
 } from '../middlewares/auth.middleware.js';
 import { searchLimiter } from '../middlewares/rateLimit.middleware.js';
+import imageRoutes from './image.routes.js';
 import { validateBody, validateParams, validateQuery } from '../middlewares/validate.middleware.js';
 import { idParam } from '../validators/common.validator.js';
 import {
@@ -20,6 +21,9 @@ import {
 } from '../validators/room.validator.js';
 
 const router = Router();
+
+// Photo gallery for a room.
+router.use('/:id/images', imageRoutes);
 
 // --- Public browsing -------------------------------------------------------
 router.get(

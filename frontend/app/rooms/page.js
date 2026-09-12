@@ -60,12 +60,12 @@ function RoomsBrowser() {
   );
 
   return (
-    <div className="min-h-screen bg-ink-50">
+    <div className="min-h-screen bg-cream-100">
       <Navbar />
 
-      <div className="border-b border-ink-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-          <h1 className="font-serif text-2xl font-bold text-ink-900">Rooms &amp; suites</h1>
+      <div className="border-b border-cream-300 bg-cream-50">
+        <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6">
+          <h1 className="font-serif text-3xl font-bold text-ink-900">Rooms &amp; suites</h1>
           <p className="mt-1 text-sm text-ink-500">
             Showing rooms still free from {formatDate(checkIn)} to {formatDate(checkOut)}
             {datesWereGiven ? '' : ' (default dates - change them below)'}. Rooms already
@@ -143,7 +143,7 @@ export default function RoomsPage() {
   return (
     <Suspense
       fallback={
-        <div className="grid min-h-screen place-items-center bg-ink-50">
+        <div className="grid min-h-screen place-items-center bg-cream-100">
           <Spinner />
         </div>
       }

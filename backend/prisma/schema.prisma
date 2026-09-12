@@ -96,6 +96,7 @@ model Hotel {
 
   rooms    Room[]
   bookings Booking[]
+  images   Image[]
 
   @@index([city])
   @@index([status])
@@ -119,12 +120,48 @@ model Room {
 
   hotel    Hotel     @relation(fields: [hotelId], references: [id], onDelete: Cascade)
   bookings Booking[]
+  images   Image[]
 
   @@unique([hotelId, roomNumber])
   @@index([hotelId])
   @@index([roomType])
   @@index([status])
   @@map("rooms")
+}
+
+// ---------------------------------------------------------------------------
+// Media
+// ---------------------------------------------------------------------------
+
+/// A photo hosted on Cloudinary, belonging to either a hotel or a room.
+/// `publicId` is what Cloudinary needs to transform or delete the asset, so it
+/// is stored rather than only the URL.
+model Image {
+  id       String @id @default(uuid())
+  publicId String @unique @map("public_id")
+  url      String
+  width    Int?
+  height   Int?
+  format   String?
+  bytes    Int?
+  /// Alt text for screen readers; falls back to the room/hotel name in the UI.
+  alt      String?
+  /// Display order. The lowest position is used as the cover image.
+  position Int    @default(0)
+
+  hotelId String? @map("hotel_id")
+  roomId  String? @map("room_id")
+
+  uploadedById String? @map("uploaded_by_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  hotel Hotel? @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  room  Room?  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([hotelId, position])
+  @@index([roomId, position])
+  @@map("images")
 }
 
 // ---------------------------------------------------------------------------

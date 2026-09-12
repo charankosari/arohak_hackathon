@@ -1,7 +1,8 @@
 'use client';
 
-import { BedDouble, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import Link from 'next/link';
+import { SmartImage } from '@/components/SmartImage';
 import { Badge, Button, Card } from '@/components/ui';
 import { money } from '@/lib/format';
 
@@ -20,9 +21,15 @@ export function RoomCard({ room, stay, showStatus = false }) {
 
   return (
     <Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-md">
-      <div className="relative flex h-32 items-center justify-center bg-ink-900">
-        <BedDouble className="size-9 text-brass-400" aria-hidden />
-        <span className="absolute top-3 left-3 rounded-md bg-ink-950/70 px-2 py-1 text-xs font-medium text-brass-200">
+      <div className="relative aspect-4/3 overflow-hidden bg-ink-900">
+        <SmartImage
+          image={room.coverImage}
+          alt={`${room.roomType}, room ${room.roomNumber}`}
+          label={room.roomType}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="transition-transform duration-700 hover:scale-105"
+        />
+        <span className="absolute top-3 left-3 rounded-md bg-ink-950/70 px-2 py-1 text-xs font-medium text-brass-200 backdrop-blur-sm">
           Room {room.roomNumber}
         </span>
         {showStatus && (

@@ -2,6 +2,8 @@
 
 import { Building2, Mail, MapPin, Pencil, Phone, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { ImageManager } from '@/components/ImageManager';
+import { SmartImage } from '@/components/SmartImage';
 import {
   Alert,
   Badge,
@@ -110,6 +112,15 @@ export default function HotelsPage() {
         <div className="grid gap-5 lg:grid-cols-2">
           {hotels.map((hotel) => (
             <Card key={hotel.id} className="overflow-hidden">
+              <div className="relative aspect-21/9 bg-ink-900">
+                <SmartImage
+                  image={hotel.coverImage}
+                  alt={hotel.name}
+                  label={hotel.name}
+                  placeholderIcon="hotel"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
               <CardHeader
                 title={hotel.name}
                 subtitle={hotel.code}
@@ -360,6 +371,11 @@ function HotelDialog({ hotel, onClose, onDone }) {
             maxLength={2000}
           />
         </Field>
+
+        <div className="border-t border-ink-100 pt-4">
+          <p className="mb-2 text-sm font-medium text-ink-700">Photographs</p>
+          <ImageManager owner="hotels" id={isNew ? null : hotel?.id} label={hotel?.name} />
+        </div>
       </div>
     </Modal>
   );

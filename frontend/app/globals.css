@@ -1,43 +1,74 @@
 @import 'tailwindcss';
 
 /*
- * The Meridian Grand - design tokens.
- * Deep navy and brass, the palette of a seafront luxury hotel.
+ * The Meridian Grand — design tokens.
+ *
+ * Warm cream ground (#FDF8F5) with soft periwinkle (#B4CDF0) for the organic
+ * shapes, deep navy for type, and a honey accent used sparingly. Sections meet
+ * along wave edges rather than hard rules, and photography is arch-cropped,
+ * echoing the building's colonnade.
  */
 @theme {
-  --color-ink-50: #f5f7fa;
-  --color-ink-100: #e9eef5;
-  --color-ink-200: #cfdae8;
-  --color-ink-300: #a6bad2;
-  --color-ink-400: #6f8bab;
-  --color-ink-500: #4a6685;
-  --color-ink-600: #354d68;
-  --color-ink-700: #253a52;
-  --color-ink-800: #18293d;
-  --color-ink-900: #0f1c2d;
-  --color-ink-950: #08121e;
+  /* Cream — the page ground */
+  --color-cream-50: #fffdfc;
+  --color-cream-100: #fdf8f5;
+  --color-cream-200: #f8efe9;
+  --color-cream-300: #f0e2d9;
+  --color-cream-400: #e2cec1;
 
-  --color-brass-50: #fdf9ef;
-  --color-brass-100: #faf0d7;
-  --color-brass-200: #f3dea8;
-  --color-brass-300: #eac673;
-  --color-brass-400: #e0ab47;
-  --color-brass-500: #c8902c;
-  --color-brass-600: #a67122;
-  --color-brass-700: #82551f;
-  --color-brass-800: #5e3e1d;
-  --color-brass-900: #3d2a16;
+  /* Sky — soft periwinkle, the organic shapes and secondary surfaces */
+  --color-sky-50: #f4f8fd;
+  --color-sky-100: #e7f0fb;
+  --color-sky-200: #d3e3f7;
+  --color-sky-300: #b4cdf0;
+  --color-sky-400: #8fb2e4;
+  --color-sky-500: #6c93d5;
+  --color-sky-600: #4e74b8;
+
+  /* Ink — deep navy, tuned to the same hue family as the periwinkle */
+  --color-ink-50: #f4f6fa;
+  --color-ink-100: #e6ebf4;
+  --color-ink-200: #c9d5e7;
+  --color-ink-300: #9fb3d1;
+  --color-ink-400: #6b84ae;
+  --color-ink-500: #47608a;
+  --color-ink-600: #33496d;
+  --color-ink-700: #253758;
+  --color-ink-800: #1a2943;
+  --color-ink-900: #132033;
+  --color-ink-950: #0b1523;
+
+  /* Honey — the warm accent. Used for highlights, never for large areas. */
+  --color-brass-50: #fffbf0;
+  --color-brass-100: #fef3d7;
+  --color-brass-200: #fce7ac;
+  --color-brass-300: #f7d57a;
+  --color-brass-400: #eebe4c;
+  --color-brass-500: #dca42e;
+  --color-brass-600: #b98422;
+  --color-brass-700: #90671f;
+  --color-brass-800: #6b4d1c;
+  --color-brass-900: #483416;
+
+  /* Blush — a single soft accent, for small decorative marks */
+  --color-blush-200: #f9d5cd;
+  --color-blush-300: #f3b5a8;
 
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-serif), ui-serif, Georgia, serif;
 }
 
 :root {
-  --surface: var(--color-ink-50);
+  --surface: var(--color-cream-100);
   --surface-raised: #ffffff;
-  --border-subtle: var(--color-ink-200);
+  --border-subtle: var(--color-cream-300);
   --text-strong: var(--color-ink-900);
   --text-muted: var(--color-ink-500);
+}
+
+html {
+  /* Anchor jumps glide; Lenis takes over for wheel scrolling. */
+  scroll-behavior: smooth;
 }
 
 body {
@@ -48,22 +79,37 @@ body {
 
 /* Keyboard focus is always visible, and always in the brand colour. */
 *:focus-visible {
-  outline: 2px solid var(--color-brass-500);
+  outline: 2px solid var(--color-sky-600);
   outline-offset: 2px;
 }
 
-/* Hide the spinner on number inputs - guest counts use explicit controls. */
 input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button {
   appearance: none;
   margin: 0;
 }
 
-@utility card {
-  background: var(--surface-raised);
-  border: 1px solid var(--border-subtle);
-  border-radius: 0.75rem;
+/* ------------------------------------------------------------------ *
+ * Shapes
+ * ------------------------------------------------------------------ */
+
+/** Arch-topped image mask — the colonnade motif. */
+@utility arch {
+  border-radius: 62% 62% 0.75rem 0.75rem / 34% 34% 0.75rem 0.75rem;
 }
+
+/** Softer, fully organic blobs. Pair with `animate-drift`. */
+@utility blob {
+  border-radius: 42% 58% 54% 46% / 48% 42% 58% 52%;
+}
+
+@utility blob-alt {
+  border-radius: 58% 42% 38% 62% / 42% 56% 44% 58%;
+}
+
+/* ------------------------------------------------------------------ *
+ * Motion
+ * ------------------------------------------------------------------ */
 
 @keyframes fade-up {
   from {
@@ -80,12 +126,69 @@ input[type='number']::-webkit-outer-spin-button {
   animation: fade-up 0.25s ease-out both;
 }
 
-/* Respect a reduced-motion preference. */
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0) rotate(2deg);
+  }
+}
+
+@utility animate-drift {
+  animation: drift 14s ease-in-out infinite;
+}
+
+/**
+ * Scroll reveal. Elements start shifted and transparent; the ScrollReveal
+ * component sets `data-revealed` when they enter the viewport.
+ */
+@utility reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+
+  &[data-revealed='true'] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/** Hand-drawn highlighter behind a word, as on the reference site. */
+@utility marker-honey {
+  position: relative;
+  display: inline-block;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 14% -0.35em 10%;
+    background: var(--color-brass-200);
+    border-radius: 0.4em 0.9em 0.5em 0.8em;
+    transform: rotate(-1.2deg);
+    z-index: -1;
+  }
+}
+
+/* Everything above degrades to static for a reduced-motion preference. */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
   }
 }

@@ -85,10 +85,10 @@ export function Sidebar({ onNavigate }) {
             href={item.href}
             onClick={onNavigate}
             aria-current={active ? 'page' : undefined}
-            className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
+            className={`flex items-center gap-2.5 rounded-full px-4 py-2.5 text-sm transition-colors ${
               active
-                ? 'bg-ink-900 font-medium text-white'
-                : 'text-ink-600 hover:bg-ink-100 hover:text-ink-900'
+                ? 'bg-ink-900 font-medium text-cream-100'
+                : 'text-ink-600 hover:bg-sky-100 hover:text-ink-900'
             }`}
           >
             <item.icon className="size-4 shrink-0" aria-hidden />
@@ -97,11 +97,11 @@ export function Sidebar({ onNavigate }) {
         );
       })}
 
-      <div className="mt-auto border-t border-ink-200 pt-3">
+      <div className="mt-auto border-t border-cream-300 pt-3">
         <Link
           href="/rooms"
           onClick={onNavigate}
-          className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-600 hover:bg-ink-100 hover:text-ink-900"
+          className="flex items-center gap-2.5 rounded-full px-4 py-2.5 text-sm text-ink-600 hover:bg-sky-100 hover:text-ink-900"
         >
           <Search className="size-4 shrink-0" aria-hidden />
           Browse rooms

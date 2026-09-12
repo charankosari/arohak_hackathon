@@ -111,7 +111,7 @@ export default function UsersPage() {
               className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
                 role === tab.key
                   ? 'bg-ink-900 font-medium text-white'
-                  : 'border border-ink-200 bg-white text-ink-600 hover:bg-ink-50'
+                  : 'border border-ink-200 bg-white text-ink-600 hover:bg-cream-100'
               }`}
             >
               {tab.label}
@@ -146,7 +146,7 @@ export default function UsersPage() {
             </thead>
             <tbody>
               {data.users.map((account) => (
-                <tr key={account.id} className={account.isActive ? 'hover:bg-ink-50' : 'bg-ink-50/60'}>
+                <tr key={account.id} className={account.isActive ? 'hover:bg-cream-100' : 'bg-ink-50/60'}>
                   <Td>
                     <span className="font-medium text-ink-900">{account.name}</span>
                     {account.id === me?.id && (

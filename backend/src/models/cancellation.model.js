@@ -1,7 +1,7 @@
 import { prisma } from '../lib/prisma.js';
 
 const fullInclude = {
-  booking: { include: { room: { include: { hotel: true } }, guest: true } },
+  booking: { include: { room: { include: { hotel: true, images: { orderBy: { position: 'asc' } } } }, guest: true } },
   requestedBy: true,
   reviewedBy: true,
 };
