@@ -456,3 +456,41 @@ def test_policy_questions_never_hit_the_backend(kb):
     ask(bot, "what time is check-in?")
     ask(bot, "how much is the family suite?")
     assert backend.calls == [], "policy questions must be answered from the document"
+
+@pytest.mark.parametrize('question, start, end', [
+    ('can you search rooms for tommorow', date(2026, 9, 13), date(2026, 9, 14)),
+    ('i want to book from 13 september to 15 september', date(2026, 9, 13), date(2026, 9, 15)),
+    ('reserve a deluxe twin tomorrow', date(2026, 9, 13), date(2026, 9, 14)),
+])
+def test_conversational_searches(kb, question, start, end):
+    backend = StubBackend({'rooms': []})
+    result = ask(Answerer(kb, backend), question)
+    assert len(backend.calls) == 1
+    assert backend.calls[0][:2] == (start, end)
+    assert result.origin == 'live'
+
+
+def test_pricing_word(bot):
+    result = ask(bot, 'can you say the pricing of deluxe twin')
+    assert '8,500' in result.text
+    assert 'per night' in result.text
+    assert result.sources
+
+
+def test_arrival_after_checkin(bot):
+    result = ask(bot, 'if i come at 3 pm can i check in')
+    assert result.text.startswith('Yes, 3:00 PM')
+    assert '2:00 PM' in result.text
+
+
+def test_early_arrival_is_not_guaranteed(bot):
+    result = ask(bot, 'if i come at 9 am can i check in')
+    assert 'subject to availability' in result.text
+    assert '1,500' in result.text
+
+
+@pytest.mark.parametrize('question', ['can I book a spa treatment tomorrow', 'can I cancel my reservation from 13 september to 15 september'])
+def test_other_booking_intents_are_not_room_searches(kb, question):
+    backend = StubBackend({'rooms': []})
+    ask(Answerer(kb, backend), question)
+    assert not backend.calls

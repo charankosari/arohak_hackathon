@@ -162,7 +162,7 @@ def _explicit_dates(text: str, today: date) -> list[date]:
 
 def _relative_date(text: str, today: date) -> date | None:
     """Resolve "tonight", "tomorrow", "this weekend", "next friday"."""
-    lowered = text.lower()
+    lowered = re.sub(r"\b(?:tommorow|tomorow|tommorrow)\b", "tomorrow", text.lower())
 
     if re.search(r"\b(tonight|today)\b", lowered):
         return today

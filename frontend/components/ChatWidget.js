@@ -243,10 +243,6 @@ export function ChatWidget() {
           role="dialog"
           aria-modal="false"
           aria-label="Concierge"
-          // The landing page runs Lenis with smoothWheel, which takes the wheel
-          // event for the whole document - so scrolling the conversation would
-          // scroll the page behind it instead. Lenis walks up from the event
-          // target looking for this attribute and leaves the subtree alone.
           data-lenis-prevent
           className="chat-panel fixed right-4 bottom-22 z-50 flex w-[min(23.5rem,calc(100vw-2rem))]
                      flex-col overflow-hidden rounded-2xl border border-cream-400 bg-cream-50
@@ -284,10 +280,16 @@ export function ChatWidget() {
             </button>
           </header>
 
-          {/* Messages */}
+          {/* Messages.
+              overscroll-contain keeps a wheel that reaches the top or bottom of
+              the conversation from chaining on to the page behind it. The
+              panel's data-lenis-prevent is the other half: the landing page
+              runs Lenis with smoothWheel, which takes the wheel event for the
+              whole document, so without it scrolling the conversation scrolls
+              the page instead. Both are needed - they fix different pages. */}
           <div
             ref={listRef}
-            className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
+            className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4"
             aria-live="polite"
             aria-atomic="false"
           >

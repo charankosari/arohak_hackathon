@@ -157,6 +157,7 @@ class Answerer:
         """One pass down the composer ladder. None means nothing matched."""
         for composer in (
             self._greeting,
+            self._arrival_time,
             self._room_facts,
             self._facility_facts,
         ):
@@ -228,14 +229,16 @@ class Answerer:
         subject = re.search(r"\brooms?\b|\bsuites?\b|\bnights?\b|\baccommodations?\b", lowered)
         verb = re.search(
             r"\bavailab\w+\b|\bvacan\w+\b|\bfree\b|\bopen\b|\bbook\w*\b|\breserv\w+\b|"
-            r"\bstay\b|\bget\b|\bwant\b|\blooking for\b",
+            r"\bstay\b|\bget\b|\bwant\b|\blooking for\b|\bsearch\b|\bfind\b",
             lowered,
         )
         # A cancellation or policy question mentioning rooms is not a search.
         excluded = re.search(r"\bcancel\w*\b|\brefund\w*\b|\bpolic\w+\b|\bmodif\w+\b", lowered)
         stay = parse_stay(question, today)
 
-        if not subject or excluded or not (verb or stay):
+        booking_intent = re.search(r"\b(?:book|reserve|reservation|stay)\b", lowered)
+        other_service = re.search(r"\b(?:spa|massage|restaurant|table|taxi|transfer|treatment)\b", lowered)
+        if other_service or excluded or not (subject or booking_intent) or not (verb or stay):
             return None
 
         if stay is None:
@@ -328,6 +331,44 @@ class Answerer:
             suggestions=["What is the cancellation policy?", "Is breakfast included?"],
         )
 
+    def _arrival_time(self, question: str) -> Answer | None:
+        """Compare an explicit arrival time with the documented check-in time."""
+        lowered = question.lower()
+        if not re.search(r"\bcheck[ -]?in\b", lowered):
+            return None
+        # Do not turn checkout, date changes, or an early-arrival exception
+        # into a promise that a room will be ready.
+        if re.search(r"\bcheck[ -]?out\b|\bcancel|\brefund|\bearly\b", lowered):
+            return None
+        clock = re.search(r"\b(1[0-2]|[1-9])(?::([0-5]\d))?\s*(am|pm)\b", lowered)
+        if not clock:
+            return None
+        standard = next((f for f in self.kb.faqs if f.question.lower() == "what time is check-in?"), None)
+        if not standard:
+            return None
+        policy_clock = re.search(r"(1[0-2]|[1-9]):([0-5]\d)\s*(AM|PM)", standard.answer)
+        if not policy_clock:
+            return None
+
+        def minutes(match):
+            return (int(match[1]) % 12 + (12 if match[3].lower() == "pm" else 0)) * 60 + int(match[2] or 0)
+
+        arrival = minutes(clock)
+        label = f"{int(clock[1])}:{clock[2] or '00'} {clock[3].upper()}"
+        sources = [Source("Section 11 - Frequently Asked Questions", standard.answer)]
+        if arrival >= minutes(policy_clock):
+            return Answer(
+                text=f"Yes, {label} is after the standard check-in time. {standard.answer} Please make sure your reservation starts on your arrival date.",
+                sources=sources, confidence=0.95,
+            )
+        early = next((f for f in self.kb.faqs if f.question.lower() == "can i request early check-in?"), None)
+        if early:
+            sources.append(Source("Section 11 - Frequently Asked Questions", early.answer))
+        return Answer(
+            text=f"{label} is before standard check-in. {standard.answer} " + (early.answer if early else "Please contact reception to confirm whether early check-in can be arranged."),
+            sources=sources, confidence=0.9,
+        )
+
     def _faq(self, question: str) -> tuple[Answer, float] | None:
         """Best match against the authored FAQ, with its score."""
         if not self.kb.faqs:
@@ -381,7 +422,7 @@ class Answerer:
         source = Source("Section 4 - Room Categories", "Room category table")
 
         asks_price = re.search(
-            r"\bprices?\b|\bcosts?\b|\brates?\b|\bhow much\b|\btariffs?\b|\bper night\b",
+            r"\bpric(?:e|es|ing)\b|\bcosts?\b|\brates?\b|\bhow much\b|\btariffs?\b|\bper night\b",
             lowered,
         )
         asks_capacity = re.search(
