@@ -20,6 +20,7 @@ database and the (upcoming) RAG chatbot describe the same hotel.
 | Database  | PostgreSQL (Railway)                                              |
 | Cache     | Redis (Railway) — caching + distributed rate limiting             |
 | Auth      | JWT (`jsonwebtoken`) + bcrypt, role-based guards                  |
+| Images    | Cloudinary — admin-uploaded hotel and room photography            |
 
 ---
 
@@ -282,6 +283,9 @@ at desktop and mobile widths, with console errors treated as failures.
 | `JWT_EXPIRES_IN` | Token lifetime, default `12h` |
 | `PORT` | API port, default `4000` |
 | `CORS_ORIGINS` | Comma-separated allowed origins |
+| `CLOUDINARY_CLOUD_NAME` | Optional. Unset → upload disabled, placeholders shown |
+| `CLOUDINARY_API_KEY` | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
 
 `frontend/.env.local`:
 
@@ -300,6 +304,59 @@ docker compose up -d
 #   DATABASE_URL="postgresql://meridian:meridian_dev_pw@localhost:5433/meridian?schema=public"
 #   REDIS_URL="redis://localhost:6380"
 ```
+
+---
+
+## Photography
+
+Hotel and room photographs are uploaded by an **administrator** and hosted on
+Cloudinary. Open a hotel or room in the admin panel and use the **Photographs**
+panel: drag files in (JPEG/PNG/WebP/AVIF, up to 8 MB each, 8 at a time), set any
+image as the cover, or delete one. The cover is what appears on cards, search
+results and the landing page.
+
+Files stream straight from the browser through the API to Cloudinary — nothing is
+written to the API's disk — and the Cloudinary secret never leaves the server. The
+stored `public_id` is what lets a delete remove the remote asset too.
+
+Photography is optional everywhere: with no images, every slot falls back to a
+designed placeholder rather than a broken frame, so the site never looks unfinished.
+
+To populate a demo quickly:
+
+```bash
+cd backend
+node scripts/seed-images.js            # preview
+node scripts/seed-images.js --apply    # upload starter photos to your Cloudinary
+node scripts/seed-images.js --reset --apply   # replace what is already there
+```
+
+---
+
+## Design
+
+The interface follows a five-colour palette:
+
+| Token | Hex | Role |
+| ----- | --- | ---- |
+| `cream` | `#FDF8F5` | page ground |
+| `sky` | `#B4CDF0` | organic shapes, secondary surfaces |
+| `ink` | `#132033` | type and dark surfaces |
+| `honey` (`brass`) | `#DCA42E` | marker highlights, sparingly |
+| `blush` | `#F3B5A8` | small decorative marks |
+
+Sections meet along wave edges rather than hard rules, photography is arch-cropped
+(echoing a colonnade), and buttons are pills with a circular arrow. Scrolling uses
+Lenis for momentum on the marketing pages — deliberately **not** on the dashboard,
+where hijacking the wheel inside a data table is irritating. Content reveals on
+scroll via `IntersectionObserver`, unobserved after the first reveal.
+
+All of it respects `prefers-reduced-motion`: Lenis does not initialise, reveals are
+immediate, and animations collapse to near-zero duration.
+
+One typographic gotcha worth knowing: the serif (Cormorant Garamond) ships
+**old-style figures**, where `1` renders as a small-cap `I`. Any serif number uses
+the `numerals` utility to force lining figures.
 
 ---
 

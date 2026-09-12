@@ -1,6 +1,7 @@
 'use client';
 
 import { LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -23,9 +24,14 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b border-cream-300/70 bg-cream-100/85 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="grid size-10 place-items-center rounded-full bg-ink-900 font-serif text-lg font-bold text-cream-100">
-            M
-          </span>
+          <Image
+            src="/logo.png"
+            alt="The Meridian Grand"
+            width={40}
+            height={40}
+            priority
+            className="size-10 rounded-full object-cover"
+          />
           <span className="hidden leading-tight sm:block">
             <span className="block font-serif text-base font-semibold text-ink-900">
               The Meridian Grand

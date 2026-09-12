@@ -203,9 +203,9 @@ export default function ManageRoomsPage() {
                   <Td className="font-medium text-ink-900">{room.roomNumber}</Td>
                   <Td>
                     <p className="text-ink-900">{room.roomType}</p>
-                    {room.amenities?.length > 0 && (
-                      <p className="max-w-xs truncate text-xs text-ink-400">
-                        {room.amenities.slice(0, 3).join(', ')}
+                    {room.images?.length > 0 && (
+                      <p className="text-xs text-ink-400">
+                        {room.images.length} photo{room.images.length === 1 ? '' : 's'}
                       </p>
                     )}
                   </Td>
@@ -229,9 +229,14 @@ export default function ManageRoomsPage() {
                   </Td>
                   <Td>
                     <div className="flex justify-end gap-1.5">
-                      <Button size="sm" variant="outline" onClick={() => setCalendarRoom(room)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setCalendarRoom(room)}
+                        aria-label={`Availability calendar for room ${room.roomNumber}`}
+                        title="Availability calendar"
+                      >
                         <CalendarDays className="size-3.5" />
-                        Calendar
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => setEditing(room)}>
                         <Pencil className="size-3.5" />

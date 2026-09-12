@@ -63,7 +63,7 @@ function RoomsBrowser() {
     <div className="min-h-screen bg-cream-100">
       <Navbar />
 
-      <div className="border-b border-cream-300 bg-cream-50">
+      <div className="relative z-20 border-b border-cream-300 bg-cream-50">
         <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6">
           <h1 className="font-serif text-3xl font-bold text-ink-900">Rooms &amp; suites</h1>
           <p className="mt-1 text-sm text-ink-500">

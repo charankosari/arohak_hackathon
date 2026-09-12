@@ -89,6 +89,15 @@ input[type='number']::-webkit-outer-spin-button {
   margin: 0;
 }
 
+/**
+ * The serif ships old-style figures, where "1" reads as a small-cap I.
+ * Any serif number - statistics, prices, counts - must use lining figures.
+ */
+@utility numerals {
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: 'lnum' 1, 'tnum' 1;
+}
+
 /* ------------------------------------------------------------------ *
  * Shapes
  * ------------------------------------------------------------------ */

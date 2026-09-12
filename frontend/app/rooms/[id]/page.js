@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { DateRangePicker } from '@/components/DateRangePicker';
+import { Dropdown } from '@/components/Dropdown';
 import { Navbar } from '@/components/Navbar';
 import { RoomGallery } from '@/components/RoomGallery';
-import { Alert, Badge, Button, Card, Field, Input, Select, Spinner, Textarea } from '@/components/ui';
+import { Alert, Button, Card, Field, Spinner, Textarea } from '@/components/ui';
 import { api } from '@/lib/api';
 import { addDaysISO, formatDate, money, nightsBetween, todayISO } from '@/lib/format';
 
@@ -82,11 +84,6 @@ function RoomDetail() {
   const unavailable = availability ? !availability.available : false;
   const canBook =
     room?.status === 'AVAILABLE' && !overCapacity && !datesInvalid && !unavailable && !checking;
-
-  function handleCheckIn(value) {
-    setCheckIn(value);
-    if (nightsBetween(value, checkOut) < 1) setCheckOut(addDaysISO(value, 1));
-  }
 
   async function onBook(event) {
     event.preventDefault();
@@ -324,26 +321,18 @@ function RoomDetail() {
                   </p>
                 )}
 
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Check-in" required>
-                    <Input
-                      type="date"
-                      value={checkIn}
-                      min={today}
-                      onChange={(e) => handleCheckIn(e.target.value)}
-                      required
-                    />
-                  </Field>
-                  <Field label="Check-out" required error={datesInvalid ? 'Invalid' : undefined}>
-                    <Input
-                      type="date"
-                      value={checkOut}
-                      min={addDaysISO(checkIn, 1)}
-                      onChange={(e) => setCheckOut(e.target.value)}
-                      error={datesInvalid}
-                      required
-                    />
-                  </Field>
+                {/* Same calendar and listbox as the search bar, so the
+                    booking flow feels like one continuous interface. */}
+                <div className="rounded-2xl border border-cream-300 px-4 py-3">
+                  <DateRangePicker
+                    checkIn={checkIn}
+                    checkOut={checkOut}
+                    minDate={today}
+                    onChange={({ checkIn: nextIn, checkOut: nextOut }) => {
+                      setCheckIn(nextIn);
+                      setCheckOut(nextOut);
+                    }}
+                  />
                 </div>
 
                 <Field
@@ -351,20 +340,21 @@ function RoomDetail() {
                   required
                   error={overCapacity ? `This room sleeps at most ${room.maxGuests}` : undefined}
                 >
-                  <Select
-                    value={guests}
-                    onChange={(e) => setGuests(Number(e.target.value))}
-                    error={overCapacity}
+                  <div
+                    className={`rounded-xl border px-3.5 py-2.5 ${
+                      overCapacity ? 'border-rose-400' : 'border-cream-400'
+                    }`}
                   >
-                    {Array.from({ length: Math.max(room.maxGuests, guests) }, (_, i) => i + 1).map(
-                      (n) => (
-                        <option key={n} value={n} disabled={n > room.maxGuests}>
-                          {n} {n === 1 ? 'guest' : 'guests'}
-                          {n > room.maxGuests ? ' - over capacity' : ''}
-                        </option>
-                      )
-                    )}
-                  </Select>
+                    <Dropdown
+                      value={guests}
+                      onChange={setGuests}
+                      label="Number of guests"
+                      options={Array.from({ length: room.maxGuests }, (_, i) => i + 1).map((n) => ({
+                        value: n,
+                        label: `${n} ${n === 1 ? 'guest' : 'guests'}`,
+                      }))}
+                    />
+                  </div>
                 </Field>
 
                 <Field label="Special requests" hint="Optional">

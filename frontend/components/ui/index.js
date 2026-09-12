@@ -335,7 +335,7 @@ export function StatTile({ label, value, hint, icon: Icon, tone = 'ink' }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-medium tracking-wide text-ink-500 uppercase">{label}</p>
-          <p className="mt-1.5 font-serif text-3xl font-bold text-ink-900">{value}</p>
+          <p className="numerals mt-1.5 font-serif text-3xl font-bold text-ink-900">{value}</p>
           {hint && <p className="mt-1 truncate text-xs text-ink-400">{hint}</p>}
         </div>
         {Icon && (

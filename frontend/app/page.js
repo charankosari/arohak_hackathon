@@ -85,7 +85,7 @@ export default function HomePage() {
       <Navbar />
 
       {/* ---------------------------------------------------------- Hero */}
-      <section className="relative px-3 pt-4 sm:px-5">
+      <section className="relative z-20 px-3 pt-4 sm:px-5">
         {/* Photograph band, with the periwinkle shape rising over it */}
         <div className="relative mx-auto max-w-[92rem] overflow-hidden rounded-[2rem]">
           <div className="relative h-[22rem] sm:h-[26rem] lg:h-[30rem]">
@@ -154,7 +154,7 @@ export default function HomePage() {
 
         {/* Availability search, lifted over the seam */}
         <ScrollReveal delay={300}>
-          <div className="mx-auto -mt-7 max-w-5xl drop-shadow-xl">
+          <div className="relative z-30 mx-auto -mt-7 max-w-5xl drop-shadow-xl">
             <AvailabilitySearch />
           </div>
         </ScrollReveal>
@@ -316,7 +316,7 @@ export default function HomePage() {
                       <p className="text-xs tracking-[0.2em] text-sky-300 uppercase">
                         Eighteenth floor
                       </p>
-                      <p className="mt-2 font-serif text-3xl font-bold text-cream-100">
+                      <p className="numerals mt-2 font-serif text-3xl font-bold text-cream-100">
                         Skyline 18
                       </p>
                       <p className="mt-2 max-w-sm text-sm text-ink-300">
