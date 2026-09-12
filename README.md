@@ -21,6 +21,7 @@ database and the (upcoming) RAG chatbot describe the same hotel.
 | Cache     | Redis (Railway) — caching + distributed rate limiting             |
 | Auth      | JWT (`jsonwebtoken`) + bcrypt, role-based guards                  |
 | Images    | Cloudinary — admin-uploaded hotel and room photography            |
+| Chatbot   | Python 3.10+, FastAPI, pypdf — retrieval-augmented, no LLM        |
 
 ---
 
@@ -172,6 +173,17 @@ backend/
     ├── app.js
     └── server.js
 
+agent/                         # RAG chatbot (Python, no LLM)
+├── app/
+│   ├── ingest.py              # PDF -> typed records + citable chunks
+│   ├── retrieval.py           # BM25, hotel vocabulary, out-of-scope gate
+│   ├── answering.py           # the composer ladder
+│   ├── dates.py               # "20 to 22 September", "next friday for 3 nights"
+│   ├── live.py                # read-only client for this API
+│   └── main.py                # FastAPI
+├── scripts/ingest.py          # build and inspect data/index.json
+└── tests/test_agent.py        # 78 tests, doubling as the eval set
+
 frontend/
 ├── app/
 │   ├── page.js                # landing + availability search
@@ -213,6 +225,9 @@ Base URL `http://localhost:4000`. All authenticated routes take
 | `GET` | `/api/cancellation-requests` | staff see all, guests see own |
 | `POST` | `/api/cancellation-requests/:id/review` | staff |
 | `GET` `POST` `PATCH` `DELETE` | `/api/users…` | admin |
+| `POST` | `/api/chat` | public — ask the hotel assistant |
+| `GET` | `/api/chat/health` | public — is the agent reachable |
+| `POST` | `/api/chat/search` | staff — raw retrieval hits, for debugging |
 | `GET` | `/health` | public — reports database and cache status |
 
 ---
@@ -374,10 +389,37 @@ the `numerals` utility to force lining figures.
 
 ---
 
-## Next: the RAG chatbot
+## The RAG chatbot
 
-Not built yet. The knowledge-base PDF is the intended source for hotel policy, facility
-and FAQ answers; per its own section 12, live booking data must come from this API
-rather than from the document. `GET /api/bookings/:id/cancellation-policy` already
-returns a structured, human-readable decision, so the chatbot can answer
-"can I cancel my booking?" from real data instead of guessing.
+`agent/` is a Python service that answers guest questions from
+`AROHAK_Hotel_Information_For_RAG.pdf`, reached through this API at `POST /api/chat`.
+Full detail in [agent/README.md](agent/README.md).
+
+**No language model is involved.** Retrieval is BM25 over the parsed PDF and the
+answers are composed from it in plain Python, so there is no API key, no model
+download and no per-message cost — and nothing the bot says can be invented: every
+sentence is either copied from the document or computed from fields parsed out of it,
+and each reply carries a citation such as `Section 2 - Hotel Policies > Check-out
+Policy`.
+
+Per the PDF's own section 12, availability comes from this API rather than the
+document: an availability question is parsed for dates and party size and routed to
+`GET /api/rooms/availability`, so the guest gets real inventory and real totals. The
+agent is read-only — it never books, cancels or modifies.
+
+```bash
+# Terminal 3 — agent on http://localhost:8001
+cd agent
+python -m venv .venv
+.venv/Scripts/activate         # macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+python -m uvicorn app.main:app --port 8001 --reload
+```
+
+```bash
+curl -X POST http://localhost:4000/api/chat   -H "Content-Type: application/json"   -d '{"message":"what happens if I check out at 4pm?"}'
+```
+
+The backend does not require the agent: with `AGENT_URL` unset or the service down,
+`/api/chat` reports 503 and everything else runs normally.
