@@ -254,7 +254,8 @@ export function ChatWidget() {
         ) : (
           <ConciergeCharacter
             state={pending ? 'thinking' : mood}
-            className="relative size-11 sm:size-12"
+            frame="bust"
+            className="relative size-12 sm:size-14"
             title=""
           />
         )}
@@ -273,8 +274,13 @@ export function ChatWidget() {
         >
           {/* Header */}
           <header className="flex items-center gap-3 border-b border-cream-300 bg-cream-200 px-4 py-3">
-            <span className="grid size-11 shrink-0 place-items-center rounded-full border-2 border-ink-900 bg-sky-300">
-              <ConciergeCharacter state={pending ? 'thinking' : mood} className="size-9" title="" />
+            <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-ink-900 bg-sky-300">
+              <ConciergeCharacter
+                state={pending ? 'thinking' : mood}
+                frame="bust"
+                className="size-10"
+                title=""
+              />
             </span>
             <span className="min-w-0">
               <span className="block font-serif text-lg leading-tight font-semibold text-ink-900">
@@ -304,6 +310,16 @@ export function ChatWidget() {
             aria-live="polite"
             aria-atomic="false"
           >
+            {/* Before the first question there is room to show him properly,
+                uniform, bell and all - the detail the 44px crops cannot hold. */}
+            {messages.length === 1 && (
+              <ConciergeCharacter
+                state={mood}
+                className="mx-auto -mt-1 mb-1 h-28 w-24"
+                title=""
+              />
+            )}
+
             {messages.map((message, i) =>
               message.role === 'user' ? (
                 <p

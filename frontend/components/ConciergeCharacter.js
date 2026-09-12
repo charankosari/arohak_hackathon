@@ -1,197 +1,356 @@
+'use client';
+
+import { useEffect, useId, useRef } from 'react';
+
 /**
- * Aarav, the Meridian Grand concierge — drawn rather than photographed.
+ * Aarav, the Meridian Grand bellhop — drawn rather than photographed.
  *
- * Flat line-art in the brand palette, matching SkylineIllustration: cream
- * fills, navy strokes, a periwinkle uniform and a brass cap band. Inline SVG so
- * it scales to any size without a network request and inherits the CSS colour
- * tokens, which keeps him in step with the palette for free.
+ * Illustrated in the brand palette to sit beside SkylineIllustration, but with
+ * more craft than a flat mark: a gold-frogged tailcoat, epaulettes, a tasselled
+ * pillbox cap, white gloves and a brass bell, shaded with gradients and lit
+ * with a sweep across the cap band.
  *
- * He is animated entirely in CSS (see globals.css) rather than with a timer or
- * an animation library: the browser runs it off the main thread, nothing
- * re-renders, and the reduced-motion block already in globals.css stops all of
- * it without this component knowing.
+ * Animation is CSS (see globals.css) with one exception: his eyes follow the
+ * pointer. That is done by writing two CSS custom properties from a
+ * rAF-throttled listener, so the pupils move without React re-rendering and
+ * without touching the SVG geometry. It is skipped entirely for a
+ * reduced-motion preference, along with everything else.
  *
- * Three states drive the expression:
- *   idle      breathing, blinking, occasional wave
- *   thinking  eyes glance up, three dots pulse above his cap
- *   speaking  a gentle nod, mouth open
+ * States:
+ *   idle      breathes, blinks, sways; waves and rings the bell now and then
+ *   thinking  glances up, brows lift, three dots pulse above the cap
+ *   speaking  nods, mouth works, brows animate
  */
-export function ConciergeCharacter({ state = 'idle', className = '', title }) {
+/**
+ * Framing. The same artwork, cropped by the viewBox rather than redrawn.
+ *
+ * A full figure shrunk into a 44px launcher leaves a 12px head, and the face is
+ * the whole point of a character. "bust" pulls in to the head, shoulders and
+ * waving hand, so the same drawing stays legible at avatar size.
+ */
+const FRAMES = {
+  full: '0 0 140 168',
+  bust: '26 -2 108 122',
+};
+
+export function ConciergeCharacter({ state = 'idle', frame = 'full', className = '', title }) {
+  const root = useRef(null);
+  // Gradient ids must be unique: the launcher and the panel header both mount
+  // one of these, and duplicate ids in a document collide.
+  const uid = useId().replace(/:/g, '');
+  const id = (name) => `${name}-${uid}`;
+
+  useEffect(() => {
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    if (reduced?.matches) return;
+
+    let frame = 0;
+    const onMove = (event) => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const el = root.current;
+        if (!el) return;
+        const box = el.getBoundingClientRect();
+        if (!box.width) return;
+        // Aim from the eyes, which sit above the centre of the figure.
+        const dx = event.clientX - (box.left + box.width / 2);
+        const dy = event.clientY - (box.top + box.height * 0.4);
+        const distance = Math.hypot(dx, dy) || 1;
+        // Saturates at arm's length so the eyes don't jitter far from the page.
+        const reach = (Math.min(distance, 320) / 320) * 2.4;
+        el.style.setProperty('--eye-x', ((dx / distance) * reach).toFixed(2));
+        el.style.setProperty('--eye-y', ((dy / distance) * reach * 0.7).toFixed(2));
+      });
+    };
+
+    window.addEventListener('pointermove', onMove, { passive: true });
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
   return (
     <svg
-      viewBox="0 0 120 132"
+      ref={root}
+      viewBox={FRAMES[frame] ?? FRAMES.full}
       role="img"
       aria-label={title ?? 'Aarav, the Meridian Grand concierge'}
-      className={`concierge concierge--${state} ${className}`}
+      className={`concierge concierge--${state} concierge--${frame} ${className}`}
     >
       <defs>
-        {/* Same 45-degree hatching as the skyline, for the jacket shadow. */}
-        <pattern
-          id="concierge-hatch"
-          width="6"
-          height="6"
-          patternTransform="rotate(45)"
-          patternUnits="userSpaceOnUse"
-        >
-          <line x1="0" y1="0" x2="0" y2="6" stroke="var(--color-ink-950)" strokeWidth="1" opacity="0.22" />
-        </pattern>
-        {/* Clips the fringe to the head so it cannot spill past the outline. */}
-        <clipPath id="concierge-head-clip">
-          <circle cx="60" cy="60" r="25" />
+        <linearGradient id={id('coat')} x1="0" y1="0" x2="0.4" y2="1">
+          <stop offset="0%" stopColor="var(--color-sky-400)" />
+          <stop offset="55%" stopColor="var(--color-sky-500)" />
+          <stop offset="100%" stopColor="var(--color-sky-600)" />
+        </linearGradient>
+        <linearGradient id={id('cap')} x1="0.2" y1="0" x2="0.8" y2="1">
+          <stop offset="0%" stopColor="var(--color-sky-400)" />
+          <stop offset="100%" stopColor="var(--color-sky-600)" />
+        </linearGradient>
+        <linearGradient id={id('skin')} x1="0.3" y1="0" x2="0.7" y2="1">
+          <stop offset="0%" stopColor="#f7e3d0" />
+          <stop offset="100%" stopColor="#e9c9ac" />
+        </linearGradient>
+        <linearGradient id={id('brass')} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="var(--color-brass-200)" />
+          <stop offset="45%" stopColor="var(--color-brass-400)" />
+          <stop offset="100%" stopColor="var(--color-brass-600)" />
+        </linearGradient>
+        {/* Travels across the cap band as a highlight. */}
+        <linearGradient id={id('shine')} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#fff" stopOpacity="0" />
+          <stop offset="50%" stopColor="#fff" stopOpacity="0.85" />
+          <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <radialGradient id={id('glow')} cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0%" stopColor="var(--color-brass-200)" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="var(--color-brass-200)" stopOpacity="0" />
+        </radialGradient>
+        <clipPath id={id('head')}>
+          <ellipse cx="70" cy="64" rx="27" ry="28" />
+        </clipPath>
+        <clipPath id={id('band')}>
+          <rect x="40" y="45" width="60" height="10" rx="5" />
         </clipPath>
       </defs>
 
-      {/* Thinking dots. Hidden unless state="thinking"; they sit above the cap. */}
+      {/* Warmth behind the figure; the launcher reads as lit rather than flat. */}
+      <ellipse className="concierge__glow" cx="70" cy="80" rx="66" ry="70" fill={`url(#${id('glow')})`} />
+
+      {/* Contact shadow. Widens as he settles, which sells the breathing. */}
+      <ellipse className="concierge__shadow" cx="70" cy="162" rx="42" ry="5.5" fill="var(--color-ink-900)" opacity="0.14" />
+
+      {/* Thinking dots, above the cap. */}
       <g className="concierge__thinking" aria-hidden="true">
-        <circle className="concierge__dot concierge__dot--1" cx="44" cy="14" r="3.4" />
-        <circle className="concierge__dot concierge__dot--2" cx="56" cy="11" r="3.4" />
-        <circle className="concierge__dot concierge__dot--3" cx="68" cy="14" r="3.4" />
+        <circle className="concierge__dot concierge__dot--1" cx="48" cy="14" r="3.6" />
+        <circle className="concierge__dot concierge__dot--2" cx="61" cy="9" r="3.6" />
+        <circle className="concierge__dot concierge__dot--3" cx="74" cy="14" r="3.6" />
       </g>
 
-      {/* Everything below breathes as one body. */}
-      <g className="concierge__body">
-        {/* ---- Shoulders and jacket ---- */}
+      <g className="concierge__figure">
+        {/* ---------------- Torso ---------------- */}
         <g strokeLinejoin="round" strokeLinecap="round">
+          {/* Neck and collar shadow */}
+          <path d="M60 84h20v18H60z" fill="#e0bb9b" stroke="var(--color-ink-900)" strokeWidth="2.4" />
+
+          {/* Tailcoat */}
           <path
-            d="M22 132c0-19 8.5-29 20-33h36c11.5 4 20 14 20 33z"
-            fill="var(--color-sky-400)"
+            d="M70 100c-14 0-24 4-30 10-7 7-10 20-10 34v22h80v-22c0-14-3-27-10-34-6-6-16-10-30-10z"
+            fill={`url(#${id('coat')})`}
             stroke="var(--color-ink-900)"
-            strokeWidth="2.4"
-          />
-          <path
-            d="M22 132c0-19 8.5-29 20-33h36c11.5 4 20 14 20 33z"
-            fill="url(#concierge-hatch)"
-            stroke="none"
+            strokeWidth="2.6"
           />
 
-          {/* Shirt and lapels: a V of cream between the jacket fronts. */}
+          {/* Shirt front, waistcoat V */}
           <path
-            d="M47 99 60 116 73 99l5 2-8 31H50l-8-31z"
-            fill="var(--color-cream-100)"
+            d="M70 100 58 104l6 62h12l6-62z"
+            fill="var(--color-cream-50)"
             stroke="var(--color-ink-900)"
             strokeWidth="2.2"
           />
-          {/* Bow tie — the one flash of blush in the uniform. */}
+
+          {/* Lapels */}
+          <path d="M58 104 46 112l8 14 10-20z" fill="var(--color-sky-600)" stroke="var(--color-ink-900)" strokeWidth="2" />
+          <path d="M82 104l12 8-8 14-10-20z" fill="var(--color-sky-600)" stroke="var(--color-ink-900)" strokeWidth="2" />
+
+          {/* Gold frogging — the bellhop signature, and legible even at 40px.
+              Each bar runs from its button in to the shirt opening and stops:
+              braid sits on the coat panels, never across the shirt. */}
+          {[
+            { y: 128, left: 44, right: 96, inL: 60, inR: 80 },
+            { y: 142, left: 43, right: 97, inL: 61, inR: 79 },
+            { y: 156, left: 44, right: 96, inL: 63, inR: 77 },
+          ].map(({ y, left, right, inL, inR }) => (
+            <g key={y}>
+              <path
+                d={`M${left} ${y}h${inL - left}`}
+                stroke="var(--color-brass-400)"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+              <path
+                d={`M${inR} ${y}h${right - inR}`}
+                stroke="var(--color-brass-400)"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+              <circle cx={left} cy={y} r="2.8" fill="var(--color-brass-300)" stroke="var(--color-ink-900)" strokeWidth="1.2" />
+              <circle cx={right} cy={y} r="2.8" fill="var(--color-brass-300)" stroke="var(--color-ink-900)" strokeWidth="1.2" />
+            </g>
+          ))}
+
+          {/* Bow tie */}
           <path
-            d="M60 108l-8-5v10zM60 108l8-5v10z"
+            d="M70 106l-11-6v13zM70 106l11-6v13z"
             fill="var(--color-blush-300)"
             stroke="var(--color-ink-900)"
-            strokeWidth="1.8"
+            strokeWidth="1.9"
           />
-          <circle cx="60" cy="108" r="2.4" fill="var(--color-blush-200)" stroke="var(--color-ink-900)" strokeWidth="1.4" />
+          <circle cx="70" cy="106" r="2.8" fill="var(--color-blush-200)" stroke="var(--color-ink-900)" strokeWidth="1.4" />
 
-          {/* Brass buttons */}
-          <circle cx="60" cy="122" r="2.2" fill="var(--color-brass-300)" stroke="var(--color-ink-900)" strokeWidth="1.3" />
-          <circle cx="60" cy="130" r="2.2" fill="var(--color-brass-300)" stroke="var(--color-ink-900)" strokeWidth="1.3" />
+          {/* Epaulettes */}
+          <g fill={`url(#${id('brass')})`} stroke="var(--color-ink-900)" strokeWidth="1.8">
+            <rect x="32" y="106" width="16" height="8" rx="4" />
+            <rect x="92" y="106" width="16" height="8" rx="4" />
+          </g>
         </g>
 
-        {/* ---- Waving arm. Rotates from the shoulder. ---- */}
-        <g className="concierge__arm">
+        {/* ---------------- Left arm, holding the bell ----------------
+            Both arms swing clear of the coat's silhouette (x 30-110). Drawn
+            inside it, a sky-coloured sleeve on a sky-coloured coat simply
+            disappears, and the wave stops reading as a wave. */}
+        <g className="concierge__bell-arm">
+          <path d="M40 114c-10 4-16 11-18 18" fill="none" stroke="var(--color-sky-600)" strokeWidth="10.5" strokeLinecap="round" />
+          <path d="M40 114c-10 4-16 11-18 18" fill="none" stroke="var(--color-ink-900)" strokeWidth="2.3" strokeLinecap="round" opacity="0.7" />
+          {/* Brass cuff, then a gloved hand with a thumb - a bare circle reads
+              as a ball on a stick at small sizes. */}
+          <path d="M17 128.5a6.5 6.5 0 0 1 9 3.5" fill="none" stroke="var(--color-brass-400)" strokeWidth="3.2" strokeLinecap="round" />
           <path
-            d="M90 112c6-5 11-12 12-19"
-            fill="none"
-            stroke="var(--color-sky-400)"
-            strokeWidth="9"
-            strokeLinecap="round"
-          />
-          <path
-            d="M90 112c6-5 11-12 12-19"
-            fill="none"
+            d="M21 132a6.8 6.8 0 1 0 0 13.6 6.8 6.8 0 0 0 0-13.6zm-6.4 3.6c-2.1 0-3.6 1.3-3.6 2.9s1.5 2.9 3.6 2.9z"
+            fill="var(--color-cream-50)"
             stroke="var(--color-ink-900)"
             strokeWidth="2.2"
-            strokeLinecap="round"
-            opacity="0.85"
+            strokeLinejoin="round"
           />
-          {/* Cuff, then the hand */}
-          <circle cx="102" cy="94" r="4" fill="var(--color-cream-100)" stroke="var(--color-ink-900)" strokeWidth="1.8" />
-          <circle cx="104" cy="87" r="6.5" fill="var(--color-cream-200)" stroke="var(--color-ink-900)" strokeWidth="2.2" />
+          <g className="concierge__bell">
+            {/* Handle, dome, flared lip, clapper. */}
+            <path d="M21 145v3.5" stroke="var(--color-ink-900)" strokeWidth="2.2" strokeLinecap="round" />
+            <path d="M13 159c0-7.5 3.5-11 8-11s8 3.5 8 11z" fill={`url(#${id('brass')})`} stroke="var(--color-ink-900)" strokeWidth="2.1" strokeLinejoin="round" />
+            <path d="M11.5 159h19" stroke="var(--color-ink-900)" strokeWidth="2.4" strokeLinecap="round" />
+            <circle cx="21" cy="162" r="2.3" fill="var(--color-brass-600)" stroke="var(--color-ink-900)" strokeWidth="1.3" />
+          </g>
         </g>
 
-        {/* ---- Head ---- */}
-        <g className="concierge__head">
-          <circle
-            cx="60"
-            cy="60"
-            r="25"
-            fill="var(--color-cream-200)"
+        {/* ---------------- Right arm, raised in a wave ---------------- */}
+        <g className="concierge__arm">
+          <path d="M100 114c11 0 19-6 22-14" fill="none" stroke="var(--color-sky-600)" strokeWidth="10.5" strokeLinecap="round" />
+          <path d="M100 114c11 0 19-6 22-14" fill="none" stroke="var(--color-ink-900)" strokeWidth="2.3" strokeLinecap="round" opacity="0.7" />
+          <path d="M117 97a6.5 6.5 0 0 1 9 3" fill="none" stroke="var(--color-brass-400)" strokeWidth="3.2" strokeLinecap="round" />
+          {/* Open palm: rounded mitt plus a thumb, so the wave reads as a hand. */}
+          <path
+            d="M126 87a7.2 7.2 0 1 1 0 14.4 7.2 7.2 0 0 1 0-14.4zm-7 4.4c-2.1 0-3.7 1.3-3.7 2.9s1.6 2.9 3.7 2.9z"
+            fill="var(--color-cream-50)"
             stroke="var(--color-ink-900)"
-            strokeWidth="2.4"
+            strokeWidth="2.2"
+            strokeLinejoin="round"
+          />
+          {/* Finger seams, short enough not to read as stripes. */}
+          <g stroke="var(--color-ink-300)" strokeWidth="1.1" strokeLinecap="round" opacity="0.8">
+            <path d="M124.5 88.5v4" />
+            <path d="M128.5 89.5v4" />
+          </g>
+        </g>
+
+        {/* ---------------- Head ---------------- */}
+        <g className="concierge__head">
+          <ellipse
+            cx="70"
+            cy="64"
+            rx="27"
+            ry="28"
+            fill={`url(#${id('skin')})`}
+            stroke="var(--color-ink-900)"
+            strokeWidth="2.6"
           />
 
-          {/* Hair, clipped to the skull */}
-          <g clipPath="url(#concierge-head-clip)">
-            <path d="M35 52c3-14 12-21 25-21s22 7 25 21c-6-6-14-9-25-9s-19 3-25 9z" fill="var(--color-ink-800)" />
+          {/* Hair at the temples, clipped to the skull */}
+          <g clipPath={`url(#${id('head')})`}>
+            <path d="M43 62c0-16 11-26 27-26s27 10 27 26c-4-8-9-12-14-12H57c-5 0-10 4-14 12z" fill="var(--color-ink-800)" />
           </g>
 
           {/* Ears */}
-          <circle cx="35" cy="62" r="4" fill="var(--color-cream-200)" stroke="var(--color-ink-900)" strokeWidth="1.8" />
-          <circle cx="85" cy="62" r="4" fill="var(--color-cream-200)" stroke="var(--color-ink-900)" strokeWidth="1.8" />
+          <ellipse cx="42" cy="66" rx="4.5" ry="6" fill={`url(#${id('skin')})`} stroke="var(--color-ink-900)" strokeWidth="2" />
+          <ellipse cx="98" cy="66" rx="4.5" ry="6" fill={`url(#${id('skin')})`} stroke="var(--color-ink-900)" strokeWidth="2" />
 
-          {/* Eyes. The group scales to nothing on the blink keyframe. */}
-          <g className="concierge__eyes" fill="var(--color-ink-950)">
-            <circle className="concierge__eye" cx="51" cy="60" r="3.1" />
-            <circle className="concierge__eye" cx="69" cy="60" r="3.1" />
-          </g>
-          {/* Catchlights sit outside the blinking group so they vanish with it. */}
-          <g className="concierge__eyes" fill="var(--color-cream-50)">
-            <circle cx="52.2" cy="58.8" r="1" />
-            <circle cx="70.2" cy="58.8" r="1" />
+          {/* Brows */}
+          <g className="concierge__brows" stroke="var(--color-ink-900)" strokeWidth="2.6" strokeLinecap="round" fill="none">
+            <path d="M53 54q7-4.5 14-1" />
+            <path d="M73 53q7-3.5 14 1" />
           </g>
 
-          {/* Brows — they lift in the thinking state. */}
-          <g
-            className="concierge__brows"
-            stroke="var(--color-ink-900)"
+          {/* Eyes: whites stay put, pupils follow the pointer, lids blink. */}
+          <g className="concierge__eyes">
+            <ellipse cx="60" cy="64" rx="6.6" ry="7" fill="#fff" stroke="var(--color-ink-900)" strokeWidth="1.9" />
+            <ellipse cx="80" cy="64" rx="6.6" ry="7" fill="#fff" stroke="var(--color-ink-900)" strokeWidth="1.9" />
+            <g className="concierge__pupils">
+              <circle cx="60" cy="64.5" r="3.4" fill="var(--color-ink-950)" />
+              <circle cx="80" cy="64.5" r="3.4" fill="var(--color-ink-950)" />
+              <circle cx="61.4" cy="62.9" r="1.2" fill="#fff" />
+              <circle cx="81.4" cy="62.9" r="1.2" fill="#fff" />
+            </g>
+          </g>
+
+          {/* Nose — a soft underside curve. A full outline reads as a smudge
+              once the whole figure is 40px wide. */}
+          <path
+            d="M67 76q3 2.5 6 0"
+            fill="none"
+            stroke="var(--color-ink-700)"
             strokeWidth="2"
             strokeLinecap="round"
-            fill="none"
-          >
-            <path d="M46 52.5q5-3 10 0" />
-            <path d="M64 52.5q5-3 10 0" />
-          </g>
+            opacity="0.6"
+          />
 
           {/* Cheeks */}
-          <ellipse cx="44" cy="68" rx="4" ry="2.6" fill="var(--color-blush-200)" opacity="0.75" />
-          <ellipse cx="76" cy="68" rx="4" ry="2.6" fill="var(--color-blush-200)" opacity="0.75" />
+          <ellipse cx="51" cy="76" rx="5" ry="3.2" fill="var(--color-blush-300)" opacity="0.6" />
+          <ellipse cx="89" cy="76" rx="5" ry="3.2" fill="var(--color-blush-300)" opacity="0.6" />
 
-          {/* Mouth: a closed smile, swapped for an open one while speaking. */}
+          {/* Mouth — one is swapped for the other while speaking. */}
           <path
             className="concierge__mouth concierge__mouth--closed"
-            d="M53 70q7 6 14 0"
+            d="M62 83q8 7 16 0"
             fill="none"
             stroke="var(--color-ink-900)"
-            strokeWidth="2.2"
+            strokeWidth="2.4"
             strokeLinecap="round"
           />
-          <ellipse
-            className="concierge__mouth concierge__mouth--open"
-            cx="60"
-            cy="72"
-            rx="5"
-            ry="4"
-            fill="var(--color-ink-900)"
-          />
-
-          {/* ---- Pillbox cap ---- */}
-          <g strokeLinejoin="round">
+          <g className="concierge__mouth concierge__mouth--open">
             <path
-              d="M37 43a23 23 0 0 1 46 0z"
-              fill="var(--color-sky-500)"
+              d="M61 83q9 12 18 0a9 9 0 0 1-18 0z"
+              fill="var(--color-ink-900)"
               stroke="var(--color-ink-900)"
-              strokeWidth="2.4"
+              strokeWidth="1.6"
+              strokeLinejoin="round"
             />
-            {/* Brass band */}
-            <path d="M36 43h48" stroke="var(--color-brass-400)" strokeWidth="5" strokeLinecap="round" />
-            <path d="M36 43h48" stroke="var(--color-ink-900)" strokeWidth="2.2" strokeLinecap="round" />
-            {/* The Meridian "M" badge: up, dip, up, down. */}
+            {/* Upper teeth, so the open mouth is not a flat hole. */}
+            <path d="M62.5 83.8h15" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" />
+          </g>
+
+          {/* ---------------- Cap ---------------- */}
+          <g className="concierge__cap">
             <path
-              d="M55 39l2.5-6 2.5 4 2.5-4 2.5 6"
+              d="M42 48C42 27 55 19 70 19s28 8 28 29z"
+              fill={`url(#${id('cap')})`}
+              stroke="var(--color-ink-900)"
+              strokeWidth="2.6"
+              strokeLinejoin="round"
+            />
+            {/* Crown highlight */}
+            <path d="M52 42c1-12 8-18 16-19-6 4-9 10-10 19z" fill="#fff" opacity="0.22" />
+
+            {/* Brass band, with a highlight that sweeps across it */}
+            <rect x="40" y="45" width="60" height="10" rx="5" fill={`url(#${id('brass')})`} stroke="var(--color-ink-900)" strokeWidth="2.2" />
+            <g clipPath={`url(#${id('band')})`}>
+              <rect className="concierge__shine" x="-30" y="45" width="26" height="10" fill={`url(#${id('shine')})`} />
+            </g>
+
+            {/* The Meridian "M" */}
+            <path
+              d="M63 40l3-11 4 7 4-7 3 11"
               fill="none"
-              stroke="var(--color-brass-200)"
-              strokeWidth="2"
+              stroke="var(--color-brass-100)"
+              strokeWidth="2.6"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
+
+            {/* Tassel, swinging from the crown */}
+            <g className="concierge__tassel">
+              <path d="M96 28c8 3 12 9 12 16" fill="none" stroke="var(--color-brass-500)" strokeWidth="2.2" strokeLinecap="round" />
+              <circle cx="108" cy="45" r="3.4" fill={`url(#${id('brass')})`} stroke="var(--color-ink-900)" strokeWidth="1.4" />
+              <path d="M108 48v7" stroke="var(--color-brass-400)" strokeWidth="3" strokeLinecap="round" />
+            </g>
           </g>
         </g>
       </g>

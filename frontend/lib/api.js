@@ -1,5 +1,19 @@
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
+// A deployed build pointing at localhost calls the visitor's own machine, so
+// every request fails with an opaque network error. Say so plainly instead.
+if (
+  typeof window !== 'undefined' &&
+  BASE.includes('localhost') &&
+  !['localhost', '127.0.0.1'].includes(window.location.hostname)
+) {
+  console.error(
+    `[api] NEXT_PUBLIC_API_URL is not set for this deployment - falling back to ${BASE}. ` +
+      'Set it in your hosting environment variables to the public URL of the API, ' +
+      'and add this origin to the API CORS_ORIGINS list.'
+  );
+}
+
 const TOKEN_KEY = 'meridian.token';
 
 /** localStorage is unavailable during SSR and can throw in private windows. */
