@@ -18,7 +18,6 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
 
   // Already signed in: don't show the form again.
   useEffect(() => {
@@ -78,24 +77,7 @@ function LoginForm() {
           autoComplete="current-password"
           placeholder="Enter password"
           required
-          action={
-            <button
-              type="button"
-              onClick={() => setShowHelp((v) => !v)}
-              className="text-xs font-medium text-ink-500 underline underline-offset-2 hover:text-ink-800"
-            >
-              Forgot password?
-            </button>
-          }
         />
-
-        {showHelp && (
-          <Alert tone="info" className="text-xs">
-            Self-service password reset is not available yet. Call reception on{' '}
-            <span className="whitespace-nowrap">+91 22 4567 8900</span> and a member of staff
-            will set a new password for you.
-          </Alert>
-        )}
 
         <div className="pt-2">
           <AuthSubmit loading={submitting}>Sign In</AuthSubmit>

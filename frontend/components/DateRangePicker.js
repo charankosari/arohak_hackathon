@@ -2,7 +2,7 @@
 
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { addDaysISO, formatDateShort, nightsBetween, todayISO } from '@/lib/format';
+import { formatDateShort, nightsBetween, todayISO } from '@/lib/format';
 
 const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
@@ -37,6 +37,12 @@ const monthLabel = (year, month) =>
 export function DateRangePicker({ checkIn, checkOut, onChange, minDate }) {
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(null);
+  /**
+   * The first click of a new range. While this is set the range is
+   * incomplete, so nothing is emitted to the parent yet - otherwise every
+   * first click would look like a finished one-night stay.
+   */
+  const [pendingStart, setPendingStart] = useState(null);
   // 'down' by default; flips to 'up' when the viewport has no room below.
   const [placement, setPlacement] = useState('down');
   const [cursor, setCursor] = useState(() => {
@@ -60,11 +66,17 @@ export function DateRangePicker({ checkIn, checkOut, onChange, minDate }) {
 
   useEffect(() => {
     if (!open) return undefined;
+    // Abandoning a half-made selection keeps the previously confirmed stay.
+    const close = () => {
+      setPendingStart(null);
+      setHovered(null);
+      setOpen(false);
+    };
     const onPointerDown = (e) => {
-      if (!rootRef.current?.contains(e.target)) setOpen(false);
+      if (!rootRef.current?.contains(e.target)) close();
     };
     const onKey = (e) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') close();
     };
     document.addEventListener('mousedown', onPointerDown);
     document.addEventListener('keydown', onKey);
@@ -91,22 +103,35 @@ export function DateRangePicker({ checkIn, checkOut, onChange, minDate }) {
   function pick(date) {
     const value = iso(date);
 
-    // No range yet, or a complete one: start over from this date.
-    if (!checkIn || (checkIn && checkOut)) {
-      onChange({ checkIn: value, checkOut: addDaysISO(value, 1) });
+    // First click of a pair: remember the arrival and wait for a departure.
+    if (!pendingStart) {
+      setPendingStart(value);
+      setHovered(null);
       return;
     }
-    // Second click earlier than the first: treat it as a new start.
-    if (value <= checkIn) {
-      onChange({ checkIn: value, checkOut: addDaysISO(value, 1) });
+
+    // Clicking the same day again is ambiguous - keep waiting.
+    if (value === pendingStart) return;
+
+    // An earlier day means they have changed their mind about arriving.
+    if (value < pendingStart) {
+      setPendingStart(value);
       return;
     }
-    onChange({ checkIn, checkOut: value });
+
+    onChange({ checkIn: pendingStart, checkOut: value });
+    setPendingStart(null);
+    setHovered(null);
     setOpen(false);
   }
 
-  /** Preview the range the pointer is currently describing. */
-  const previewEnd = checkIn && !checkOut && hovered && hovered > checkIn ? hovered : checkOut;
+  // While choosing, the calendar shows the draft; otherwise the committed stay.
+  const rangeStart = pendingStart ?? checkIn;
+  const rangeEnd = pendingStart
+    ? hovered && hovered > pendingStart
+      ? hovered
+      : null
+    : checkOut;
 
   return (
     <div ref={rootRef} className="relative">
@@ -187,10 +212,10 @@ export function DateRangePicker({ checkIn, checkOut, onChange, minDate }) {
 
                     const value = iso(date);
                     const disabled = value < min;
-                    const isStart = value === checkIn;
-                    const isEnd = value === checkOut;
+                    const isStart = value === rangeStart;
+                    const isEnd = value === rangeEnd;
                     const inRange =
-                      checkIn && previewEnd && value > checkIn && value < previewEnd;
+                      rangeStart && rangeEnd && value > rangeStart && value < rangeEnd;
 
                     return (
                       <button
@@ -226,13 +251,19 @@ export function DateRangePicker({ checkIn, checkOut, onChange, minDate }) {
 
           <div className="mt-4 flex items-center justify-between border-t border-cream-200 pt-3">
             <p className="text-xs text-ink-500">
-              {checkIn && checkOut
-                ? `${formatDateShort(checkIn)} → ${formatDateShort(checkOut)} · ${nights} night${nights === 1 ? '' : 's'}`
-                : 'Pick your arrival date'}
+              {pendingStart
+                ? `${formatDateShort(pendingStart)} → select your check-out date`
+                : checkIn && checkOut
+                  ? `${formatDateShort(checkIn)} → ${formatDateShort(checkOut)} · ${nights} night${nights === 1 ? '' : 's'}`
+                  : 'Select your check-in date'}
             </p>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setPendingStart(null);
+                setHovered(null);
+                setOpen(false);
+              }}
               className="rounded-full bg-ink-900 px-4 py-1.5 text-xs font-medium text-cream-100 hover:bg-ink-800"
             >
               Done
